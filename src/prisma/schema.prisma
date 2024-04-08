@@ -1,0 +1,19 @@
+generator client {
+  provider             = "prisma-client-py"
+  recursive_type_depth = "8"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:../database/database.db"
+}
+
+model prefixes {
+  guild_id BigInt    @id @unique
+  prefix   String @default(".")
+}
+
+model statistics {
+  guild_id      BigInt @id @unique
+  commands_used Int @default(0)
+}

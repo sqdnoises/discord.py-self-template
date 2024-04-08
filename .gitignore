@@ -1,0 +1,10 @@
+# cache and virtual environments
+**/__pycache__
+.venv/
+
+# environmental variables
+.env
+
+# database related
+*-shm
+*-wal
