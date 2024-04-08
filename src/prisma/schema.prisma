@@ -8,12 +8,13 @@ datasource db {
   url      = "file:../database/database.db"
 }
 
-model prefixes {
-  guild_id BigInt    @id @unique
-  prefix   String @default(".")
-}
-
 model statistics {
   guild_id      BigInt @id @unique
-  commands_used Int @default(0)
+  commands_used Int    @default(0)
+}
+
+model configuration {
+  guild_id               BigInt  @id @unique
+  prefix                 String  @default(".")
+  no_permissions_message String?
 }

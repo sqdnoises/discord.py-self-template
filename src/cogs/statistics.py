@@ -1,6 +1,7 @@
 import asyncio
-import discord
 from classes import Bot, Context
+
+import discord
 from discord.ext import commands
 
 class Statistics(commands.Cog):
@@ -30,7 +31,7 @@ class Statistics(commands.Cog):
             title = "Statistics",
             description = f"**Commands used: ** {stats.commands_used}",
             timestamp = discord.utils.utcnow(),
-            color=discord.Color.orange()
+            color=discord.Color.blurple()
         )
         
         await ctx.send(embed=embed)

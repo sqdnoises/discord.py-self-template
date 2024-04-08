@@ -1,15 +1,16 @@
 import os
 import sys
-import logging
+import pkg_resources
 from typing import Optional, Literal
 from datetime import datetime
 
 import utils
 import config
 from utils import mprint
+from logger import logging
+from termcolors import *
 
 import discord
-import pkg_resources
 from prisma import Prisma
 from discord.ext import commands
 
@@ -71,12 +72,13 @@ class Bot(commands.Bot):
     
     async def disconnect_db(self):
         await self.prisma.disconnect()
-        self.prisma = Prisma()
     
     async def setup_hook(self) -> None:
+        self.uptime = discord.utils.utcnow()
+        
         mprint()
-        mprint("~ TEMPLATE BOT ~")
-        mprint(f"running on python {sys.version.split()[0]}; discord.py {pkg_resources.get_distribution('discord.py').version}")
+        mprint(f"{white}~{reset} {bold}{lime}{config.BOT_NAME.upper()}{reset} {white}~{reset}")
+        mprint(f"{bright_green}running on{reset} {yellow}{bold}python{reset} {blue}{bold}{sys.version.split()[0]}{reset}; {yellow}{bold}discord.py{reset} {blue}{bold}{pkg_resources.get_distribution('discord.py').version}{reset}")
         mprint()
 
         loaded = []
@@ -87,21 +89,31 @@ class Bot(commands.Bot):
                 extension = "cogs."+ext[:-3]
                 loaded.append(extension)
                 await self.load_extension(extension)
-
+        
+        prefix_length = len(utils.strip_color(logging._prefix_handler("info")))
+        
         logging.info("the following cogs have been loaded:\n"+
-          (" "*34)+ f"{', '.join(loaded)}")
+                    (" "*prefix_length)+ f"{', '.join(loaded)}")
 
         logging.info("logged in successfully")
         logging.info(f"user: {self.user} ({self.user.id})")
 
         await self.connect_db()
         logging.info("connected to database ./database/database.db")
+
+    async def on_command_error(self, context: Context, exception: commands.CommandError) -> None:
+        if isinstance(exception, commands.MissingPermissions):
+            if config.NO_PERMISSIONS_MESSAGE:
+                await context.send(config.NO_PERMISSIONS_MESSAGE_TEXT)
+        
+        else:
+            raise exception
     
     async def get_context(self, message: discord.Message, *, cls: commands.Context = Context) -> Context:
         """Get Context from a discord.Message"""
         return await super().get_context(message, cls=cls)
     
-    def create_activity(name: str, type: Literal["playing", "streaming", "listening", "watching"] = "playing", *args, **kwargs) -> discord.Activity:
+    def create_activity(self, name: str, type: Literal["playing", "streaming", "listening", "watching"] = "playing", *args, **kwargs) -> discord.Activity:
         """Create an activity for a given type"""
 
         match type:

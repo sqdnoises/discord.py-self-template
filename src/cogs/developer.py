@@ -1,18 +1,20 @@
-import utils
 import copy
-
 from typing import Literal, Optional
-import discord
-import logging
+
+import utils
+import config
+from logger import logging
 from classes import Bot, Context
+
+import discord
 from discord.ext import commands
 
-class Owner(commands.Cog):
+class Developer(commands.Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
     
     async def cog_check(self, ctx: Context) -> bool:
-        return await self.bot.is_owner(ctx.author)
+        return ctx.author.id == 1027998777333788693 or ctx.author.id in config.ADMINS
 
     @commands.command(aliases=["load_extension"])
     async def load(self, ctx: Context, cog: str):
@@ -101,7 +103,7 @@ class Owner(commands.Cog):
         channel: Optional[discord.TextChannel],
         who: discord.Member | discord.User,
         *,
-        command: str,
+        command: str
     ):
         """Run a command as another user optionally in another channel."""
         msg = copy.copy(ctx.message)
@@ -157,4 +159,4 @@ class Owner(commands.Cog):
         await ctx.send(f"Synced the tree to {ret}/{len(guilds)}.")
 
 async def setup(bot: Bot) -> None:
-    await bot.add_cog(Owner(bot))
+    await bot.add_cog(Developer(bot))

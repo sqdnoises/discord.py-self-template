@@ -1,4 +1,3 @@
-import discord
 import config
 from discord.ext import commands
 from classes import Context
