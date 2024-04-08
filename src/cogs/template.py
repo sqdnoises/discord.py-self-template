@@ -1,6 +1,6 @@
-import logging
-import discord
 from classes import Bot, Context
+
+import discord
 from discord.ext import commands
 from discord import app_commands
 

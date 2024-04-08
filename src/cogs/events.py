@@ -1,7 +1,7 @@
-import logging
+from logger import logging
 from classes import Bot
+
 from discord.ext import commands
-import prisma.errors as prisma_errors
 
 class Events(commands.Cog):
     """All bot events"""
@@ -19,18 +19,18 @@ class Events(commands.Cog):
         prisma = self.bot.prisma
         
         guild_stats = await prisma.statistics.find_unique(
-            where={"guild_id": ctx.guild.id}
+            where = {"guild_id": ctx.guild.id}
         )
 
         if guild_stats:
             await prisma.statistics.update(
-                where={"guild_id": ctx.guild.id},
-                data ={"commands_used": guild_stats.commands_used + 1}
+                where = {"guild_id": ctx.guild.id},
+                data = {"commands_used": guild_stats.commands_used + 1}
             )
         
         else:
             await prisma.statistics.create(
-                data={"guild_id": ctx.guild.id, "commands_used": 1}
+                data = {"guild_id": ctx.guild.id, "commands_used": 1}
             )
 
 async def setup(bot: Bot) -> None:

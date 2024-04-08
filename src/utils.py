@@ -1,30 +1,42 @@
 import os
-from typing import Callable, List
+import re
+from typing import Callable, List, Any
+
+import config
+from logger import logging
 
 import aiohttp
-import config
-import asqlite
 import discord
+from prisma import Prisma
 from discord.ext import commands
 
-async def get_prefix(bot: commands.Bot, message: discord.Message):
+class MockBot(commands.Bot):
+    prisma: Prisma
+
+async def get_prefix(bot: MockBot, message: discord.Message):
     """Get the prefix for the bot"""
-    cursor = await bot.db.execute("SELECT prefix FROM prefixes WHERE guild_id = ?;",
-                                  (message.guild.id,))
+    prisma = bot.prisma
     
-    prefix = await cursor.fetchone()
-    if prefix is None:
-        await bot.db.execute("INSERT INTO prefixes (guild_id, prefix) VALUES (?, ?);",
-                             (message.guild.id, config.DEFAULT_PREFIX))
-        prefix = (config.DEFAULT_PREFIX,)
+    guild = await prisma.configuration.find_unique(where={"guild_id": message.guild.id})
     
-    await bot.db.commit()
+    if guild:
+        prefix = guild.prefix
     
-    prefix = prefix[0]
+    else:
+        await prisma.prefixes.create(data={"guild_id": message.guild.id, "prefix": config.DEFAULT_PREFIX})
+        prefix = config.DEFAULT_PREFIX
     
     return commands.when_mentioned_or(prefix)(bot, message)
 
-def mprint(text: str = "", end: str = "\n", flush: bool = False):
+def show_terminal_size():
+    try:
+        terminal = os.get_terminal_size()
+    except:
+        logging.warn("could not detect terminal size")
+    else:
+        logging.info(f"detected current terminal size: {terminal.columns}x{terminal.lines}")
+
+def mprint(text: str = "", fillchar: str = " ", end: str = "\n", flush: bool = False):
     """Print text in the middle of the terminal if possible, and normally if not"""
     
     try:
@@ -35,14 +47,14 @@ def mprint(text: str = "", end: str = "\n", flush: bool = False):
     
     else:
         text = str(text)
-        text_length = len(text)
-        if text_length < width:
-            spaces = " " * (int(width/2) - int(text_length/2))
+        color_stripped = strip_color(text)
         
-        else:
-            spaces = ""
-        
-        print(spaces+text, end=end, flush=flush)
+        centered_text = color_stripped.center(width, fillchar).replace(color_stripped, text)
+        print(centered_text, end=end, flush=flush)
+
+def strip_color(text: str) -> str:
+    """Strip all color codes from a string"""
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 def code(text: str, language: str = "py"):
     """Return a code block version of the text provided"""
