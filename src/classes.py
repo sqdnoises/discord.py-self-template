@@ -77,8 +77,8 @@ class Bot(commands.Bot):
         self.uptime = discord.utils.utcnow()
         
         mprint()
-        mprint(f"{white}~{reset} {bold}{lime}{config.BOT_NAME.upper()}{reset} {white}~{reset}")
-        mprint(f"{bright_green}running on{reset} {yellow}{bold}python{reset} {blue}{bold}{sys.version.split()[0]}{reset}; {yellow}{bold}discord.py{reset} {blue}{bold}{pkg_resources.get_distribution('discord.py').version}{reset}")
+        mprint(f"{white}~{reset} {bold}{green}{config.BOT_NAME.upper()}{reset} {white}~{reset}")
+        mprint(f"{bright_green}running on{reset} {yellow}python{reset} {blue}{sys.version.split()[0]}{reset}; {yellow}discord.py{reset} {blue}{pkg_resources.get_distribution('discord.py').version}{reset}")
         mprint()
 
         loaded = []
