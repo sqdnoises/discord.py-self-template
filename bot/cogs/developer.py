@@ -26,7 +26,7 @@ class Developer(Cog):
 
     @commands.command(aliases=["load_extension"])
     async def load(self, ctx: Context, cog: str):
-        """Load a cog."""
+        """Load a cog"""
         ext = cogs.__package__+"."+cog
         logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to load `{ext}`")
         await self.bot.load_extension(ext)
@@ -35,7 +35,7 @@ class Developer(Cog):
 
     @commands.command(aliases=["unload_extension"])
     async def unload(self, ctx: Context, cog: str):
-        """Unload a cog."""
+        """Unload a cog"""
         ext = cogs.__package__+"."+cog
         logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to unload `{ext}`")
         await self.bot.unload_extension(ext)
