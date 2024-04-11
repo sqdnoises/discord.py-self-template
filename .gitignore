@@ -8,3 +8,6 @@
 # database related
 *-shm
 *-wal
+
+# uneeded metadata
+*.egg-info

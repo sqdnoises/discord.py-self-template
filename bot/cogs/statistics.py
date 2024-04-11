@@ -1,17 +1,21 @@
 import time
 import asyncio
 
-import objects
-from classes import Bot, Context
+from ..        import objects
+from ..classes import Bot, Cog, Context
 
+import psutil
 import discord
 from discord.ext import commands
 
-class Statistics(commands.Cog):
-    """Statistics"""
+class Statistics(Cog):
+    """All kind of statistics of the bot."""
 
     def __init__(self, bot: Bot) -> None:
         self.bot = bot
+        self.emoji = "📊"
+        self.process = psutil.Process()
+        self.short_description = "All kind of statistics of the bot"
     
     async def get_statistics(self, guild_id: int):
         prisma = self.bot.prisma
@@ -32,10 +36,10 @@ class Statistics(commands.Cog):
         
         return objects.Statistics(**stats)
     
-    async def measure_ping(self, ctx: Context, message: str = "Ping?"):
+    async def measure_ping(self, ctx: Context, message: str = "Ping?", **kwargs):
         """Measure the ping"""
         start = time.monotonic()
-        msg = await ctx.send(message)
+        msg = await ctx.send(message, **kwargs)
         end = time.monotonic()
 
         return msg, end - start
@@ -77,9 +81,14 @@ class Statistics(commands.Cog):
                     f"`{all_stats.commands_used}` (total)"
         )
         
+        memory_usage = self.process.memory_full_info().uss / 1024**2
+        cpu_usage = self.process.cpu_percent() / psutil.cpu_count()
+        
         embed.add_field(
-            name = "Uptime",
-            value = f"up since <t:{int(bot.uptime.timestamp())}:R>"
+            name = "Process",
+            value = f"`{round(cpu_usage * 100)}%` (cpu)\n"
+                    f"`{round(memory_usage)} MiB` (memory)\n"
+                    f"up since <t:{int(bot.uptime.timestamp())}:R>"
         )
         
         msg, msg_latency = await self.measure_ping(ctx)

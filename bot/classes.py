@@ -1,21 +1,28 @@
-import os
 import sys
 import pkg_resources
 from typing import Optional, Literal
 from datetime import datetime
 
-import utils
-import config
-from utils import mprint
-from logger import logging
-from termcolors import *
+from .           import cogs
+from .           import utils
+from .           import config
+from .utils      import mprint
+from .logger     import logging
+from .termcolors import *
 
 import discord
 from prisma import Prisma
 from discord.ext import commands
 
+__all__ = (
+    "Context",
+    "Bot",
+    "Cog"
+)
+
 class Context(commands.Context):
     """Utility class for commands that is used to easily interact with commands."""
+    bot: "Bot"
 
     def __init__(self, *args, **kwargs) -> None: # initialize the class
         super().__init__(*args, **kwargs)
@@ -32,7 +39,7 @@ class Context(commands.Context):
             title=title,
             description=description,
             url=url,
-            color=0x2b2d31, # Dark Gray Embed Background
+            color=discord.Color.dark_embed(), # Dark Gray Embed Background
             timestamp=timestamp
         )
 
@@ -82,32 +89,37 @@ class Bot(commands.Bot):
         mprint()
 
         loaded = []
-        exclude = config.COGS_EXCLUDE
-        for ext in os.listdir("cogs"):
-            if ext in exclude: continue
-            if ext.endswith(".py"):
-                extension = "cogs."+ext[:-3]
-                loaded.append(extension)
-                await self.load_extension(extension)
+        excluded = []
         
+        exclude = config.COGS_EXCLUDE
+        for module in utils.list_modules(cogs):
+            if module in exclude or module.replace(cogs.__package__+".", "", 1) in exclude:
+                excluded.append(module)
+                continue
+            
+            loaded.append(module)
+            await self.load_extension(module)
+        
+        loaded_paginated = utils.paginate(loaded, 3)
+        excluded_paginated = utils.paginate(excluded, 3)
         prefix_length = len(utils.strip_color(logging._prefix_handler("info")))
         
-        logging.info("the following cogs have been loaded:\n"+
-                    (" "*prefix_length)+ f"{', '.join(loaded)}")
+        loaded_str = f"the following cogs have been {underline}loaded{reset}:\n"
+        for x in loaded_paginated:
+            loaded_str += (" "*prefix_length)+ f"{', '.join(x)}\n"
+        
+        excluded_str = f"the following cogs have been {underline}excluded{reset}:\n"
+        for x in excluded_paginated:
+            excluded_str += (" "*prefix_length)+ f"{', '.join(x)}\n"
+        
+        logging.info(loaded_str.strip())
+        logging.info(excluded_str.strip())
 
         logging.info("logged in successfully")
         logging.info(f"user: {self.user} ({self.user.id})")
 
         await self.connect_db()
         logging.info("connected to database ./database/database.db")
-
-    async def on_command_error(self, context: Context, exception: commands.CommandError) -> None:
-        if isinstance(exception, commands.MissingPermissions):
-            if config.NO_PERMISSIONS_MESSAGE:
-                await context.send(config.NO_PERMISSIONS_MESSAGE_TEXT)
-        
-        else:
-            raise exception
     
     async def get_context(self, message: discord.Message, *, cls: commands.Context = Context) -> Context:
         """Get Context from a discord.Message"""
@@ -125,3 +137,9 @@ class Bot(commands.Bot):
                 return discord.Activity(type=discord.ActivityType.listening, name=name, *args, **kwargs)
             case "watching":
                 return discord.Activity(type=discord.ActivityType.watching, name=name, *args, **kwargs)
+
+class Cog(commands.Cog):
+    bot: Bot
+    emoji: str = None
+    hidden: bool = False
+    short_description: str | None = None

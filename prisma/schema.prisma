@@ -14,7 +14,6 @@ model statistics {
 }
 
 model configuration {
-  guild_id               BigInt  @id @unique
-  prefix                 String  @default(".")
-  no_permissions_message String?
+  guild_id BigInt @id @unique
+  prefix   String @default(".")
 }

@@ -1,4 +1,10 @@
 prisma
+psutil
+pillow
 discord.py
 setuptools
 python-dotenv
+
+# For color detection
+pillow
+scikit-learn
