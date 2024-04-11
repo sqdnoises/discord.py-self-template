@@ -17,7 +17,7 @@ class Statistics(Cog):
         self.process = psutil.Process()
         self.short_description = "All kind of statistics of the bot"
     
-    async def get_statistics(self, guild_id: int):
+    async def get_statistics(self, guild_id: int) -> None:
         prisma = self.bot.prisma
         
         statistics = await prisma.statistics.find_unique_or_raise(
@@ -26,7 +26,7 @@ class Statistics(Cog):
 
         return statistics
 
-    async def get_all_statistics(self):
+    async def get_all_statistics(self) -> None:
         prisma = self.bot.prisma
         
         statistics = await prisma.statistics.find_many()
@@ -36,7 +36,7 @@ class Statistics(Cog):
         
         return objects.Statistics(**stats)
     
-    async def measure_ping(self, ctx: Context, message: str = "Ping?", **kwargs):
+    async def measure_ping(self, ctx: Context, message: str = "Ping?", **kwargs) -> None:
         """Measure the ping"""
         start = time.monotonic()
         msg = await ctx.send(message, **kwargs)
@@ -45,14 +45,14 @@ class Statistics(Cog):
         return msg, end - start
     
     @commands.command(aliases=["latency"])
-    async def ping(self, ctx: Context):
+    async def ping(self, ctx: Context) -> None:
         """Check the latency of the bot"""
         bot = self.bot
         msg, msg_latency = await self.measure_ping(ctx)
         await msg.edit(content=f"Pong! 🏓 (took `{round(msg_latency * 1000)}ms`, ws: `{round(bot.latency * 1000)}ms`)")
     
     @commands.command(aliases=["stats"])
-    async def statistics(self, ctx: Context):
+    async def statistics(self, ctx: Context) -> None:
         """Statistics of the bot"""
         bot = self.bot
         

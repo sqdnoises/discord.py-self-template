@@ -13,7 +13,7 @@ class Test(Cog):
         self.hidden = True
     
     @commands.command(hidden=True)
-    async def test(self, ctx: Context):
+    async def test(self, ctx: Context) -> None:
         """Test command"""
         logging.log_level = 5
         logging.info("INFO example")

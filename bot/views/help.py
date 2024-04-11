@@ -99,7 +99,7 @@ class HelpView(discord.ui.View):
             cog: Cog
             
             embed = await craft_help_embed(self.ctx, cog, items=self.items)
-            if embed and not cog.hidden:
+            if embed:
                 dropdown.options.append(discord.SelectOption(
                     label=cog.qualified_name,
                     value=cog.__class__.__name__,
