@@ -1,6 +1,6 @@
 from ..classes    import Bot, Cog, Context
 from ..utils.help import *
-from ..views.help import HelpView
+from ..views.help import CommandHelpView, HelpView
 
 from discord.ext import commands
 
@@ -40,7 +40,8 @@ class Help(Cog):
             if not embed:
                 return await ctx.send(f"Command `{command}` not found.")
             
-            view = None
+            view = CommandHelpView(ctx, cmd.cog)
+            await view.update_button()
         
         await ctx.send(embed=embed, view=view)
 
