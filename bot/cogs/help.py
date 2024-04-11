@@ -42,6 +42,9 @@ class Help(Cog):
             
             view = CommandHelpView(ctx, cmd.cog)
             await view.update_button()
+            
+            if cmd.cog and cmd.cog.hidden:
+                view = None
         
         await ctx.send(embed=embed, view=view)
 
