@@ -26,8 +26,7 @@ class Developer(Cog):
 
     @commands.command(aliases=["load_extension"])
     async def load(self, ctx: Context, cog: str):
-        """Load a cog"""
-        
+        """Load a cog."""
         ext = cogs.__package__+"."+cog
         logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to load `{ext}`")
         await self.bot.load_extension(ext)
@@ -36,8 +35,7 @@ class Developer(Cog):
 
     @commands.command(aliases=["unload_extension"])
     async def unload(self, ctx: Context, cog: str):
-        """Unload a cog"""
-        
+        """Unload a cog."""
         ext = cogs.__package__+"."+cog
         logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to unload `{ext}`")
         await self.bot.unload_extension(ext)
@@ -46,8 +44,7 @@ class Developer(Cog):
 
     @commands.command(aliases=["r", "re", "reload_all", "reload_extension", "reload_all_extensions"])
     async def reload(self, ctx: Context, *cogs: str):
-        """Reload an or all cogs"""
-        
+        """Reload an or all cogs."""
         if len(cogs) == 0:
             extensions = [k for k in self.bot.extensions.keys()]
             
@@ -79,7 +76,7 @@ class Developer(Cog):
     
     @commands.command(aliases=["exts", "loaded", "loaded_extensions"])
     async def extensions(self, ctx: Context):
-        """List all loaded cogs"""
+        """List all loaded cogs."""
         
         paginated_list = utils.paginate([f"`{k}`" for k in self.bot.extensions.keys()])
         extensions = [", ".join(group) for group in paginated_list]
