@@ -1,3 +1,4 @@
+from ..           import checks
 from ..classes    import Bot, Cog, Context
 from ..utils.help import *
 from ..views.help import CommandHelpView, HelpView
@@ -17,7 +18,7 @@ class Help(Cog):
         self.short_description = "Getting help on the bot"
     
     @commands.command(aliases=["h", "commands"])
-    async def help(self, ctx: Context, command: str = None):
+    async def help(self, ctx: Context, command: str = None) -> None:
         """Shows this help page"""
         bot = self.bot
         
@@ -43,7 +44,7 @@ class Help(Cog):
             view = CommandHelpView(ctx, cmd.cog)
             await view.update_button()
             
-            if cmd.cog and cmd.cog.hidden:
+            if cmd.cog and cmd.cog.hidden and not checks._is_admin(ctx):
                 view = None
         
         await ctx.send(embed=embed, view=view)

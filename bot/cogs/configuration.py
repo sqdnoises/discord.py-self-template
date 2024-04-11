@@ -21,7 +21,7 @@ class Configuration(Cog):
     
     @commands.command()
     @commands.has_guild_permissions(manage_guild=True)
-    async def prefix(self, ctx: Context, *, new_prefix: str | None = None):
+    async def prefix(self, ctx: Context, *, new_prefix: str | None = None) -> None:
         """Show or change the prefix
         
         User Permissions:

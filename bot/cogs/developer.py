@@ -13,19 +13,20 @@ from discord.ext import commands
 class Developer(Cog):
     """All developer utilities."""
     
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: Bot) -> None:
         self.bot = bot
         self.emoji = "🔨"
         self.short_description = "All developer utilities"
+        self.hidden = True
     
     async def cog_check(self, ctx: Context) -> bool:
-        if ctx.author.id == 1027998777333788693 or ctx.author.id in config.ADMINS:
+        if ctx.author.id in config.ADMINS:
             return True
         else:
             raise commands.MissingPermissions([])
 
     @commands.command(aliases=["load_extension"])
-    async def load(self, ctx: Context, cog: str):
+    async def load(self, ctx: Context, cog: str) -> None:
         """Load a cog"""
         ext = cogs.__package__+"."+cog
         logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to load `{ext}`")
@@ -34,7 +35,7 @@ class Developer(Cog):
         logging.info(f"successfully loaded `{ext}`")
 
     @commands.command(aliases=["unload_extension"])
-    async def unload(self, ctx: Context, cog: str):
+    async def unload(self, ctx: Context, cog: str) -> None:
         """Unload a cog"""
         ext = cogs.__package__+"."+cog
         logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to unload `{ext}`")
@@ -43,7 +44,7 @@ class Developer(Cog):
         logging.info(f"successfully unloaded `{ext}`")
 
     @commands.command(aliases=["r", "re", "reload_all", "reload_extension", "reload_all_extensions"])
-    async def reload(self, ctx: Context, *cogs: str):
+    async def reload(self, ctx: Context, *cogs: str) -> None:
         """Reload an or all cogs"""
         if len(cogs) == 0:
             extensions = [k for k in self.bot.extensions.keys()]
@@ -75,7 +76,7 @@ class Developer(Cog):
         await msg.edit(content=ext_status)
     
     @commands.command(aliases=["exts", "loaded", "loaded_extensions"])
-    async def extensions(self, ctx: Context):
+    async def extensions(self, ctx: Context) -> None:
         """List all loaded cogs"""
         paginated_list = utils.paginate([f"`{k}`" for k in self.bot.extensions.keys()])
         extensions = [", ".join(group) for group in paginated_list]
@@ -87,7 +88,7 @@ class Developer(Cog):
     @load.error
     @unload.error
     @reload.error
-    async def on_extension_error(self, ctx: Context, error: commands.CommandError):
+    async def on_extension_error(self, ctx: Context, error: commands.CommandError) -> None:
         if isinstance(error, commands.CheckFailure) or isinstance(error, commands.MissingRequiredArgument):
             return
         
@@ -108,7 +109,7 @@ class Developer(Cog):
         who: discord.Member | discord.User,
         *,
         command: str
-    ):
+    ) -> None:
         """Run a command as another user optionally in another channel"""
         msg = copy.copy(ctx.message)
         new_channel = channel or ctx.channel
@@ -119,7 +120,7 @@ class Developer(Cog):
         await self.bot.invoke(new_ctx)
 
     @commands.command()
-    async def do(self, ctx: Context, times: int, *, command: str):
+    async def do(self, ctx: Context, times: int, *, command: str) -> None:
         """Repeats a command a specified number of times"""
         msg = copy.copy(ctx.message)
         msg.content = ctx.prefix + command

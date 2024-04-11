@@ -3,6 +3,7 @@ Help Command-related utilities
 """
 
 from ..        import utils
+from ..        import checks
 from .         import colors       as colorutils
 from ..        import config
 from ..classes import Cog, Context
@@ -41,16 +42,17 @@ async def craft_help_embed(ctx: Context, category_or_command: Cog | commands.Com
         command = category_or_command
     
     if category:
-        if category.hidden:
+        if category.hidden and not checks._is_admin(ctx):
             return None
         
         embed = discord.Embed(
-            title = f"{category.emoji} Category `{category.qualified_name}`",
+            title = f"{category.emoji} Category `{category.qualified_name}` {'(hidden)' if category.hidden else ''}",
             description = category.description.format(
                 prefix=ctx.prefix,
                 clean_prefix=ctx.clean_prefix,
                 guild=ctx.guild,
-                author=ctx.author
+                author=ctx.author,
+                bot=bot
             ),
             color = colorutils.get_random_dominant_color(await bot.user.display_avatar.read()),
             timestamp = discord.utils.utcnow()
@@ -59,7 +61,7 @@ async def craft_help_embed(ctx: Context, category_or_command: Cog | commands.Com
         cmds = []
         for command in bot.commands:
             try:
-                if command.cog == category and await command.can_run(ctx) and not command.hidden:
+                if command.cog == category and not command.hidden:
                     cmds.append(command)
             
             except commands.CheckFailure:
@@ -92,11 +94,9 @@ async def craft_help_embed(ctx: Context, category_or_command: Cog | commands.Com
         )
     
     else:
-        try:
-            if not await command.can_run(ctx):
+        if command.cog:
+            if command.cog.hidden and not checks._is_admin(ctx):
                 return None
-        except commands.MissingPermissions:
-            return None
         
         embed = discord.Embed(
             title = f"✨ Command `{command.qualified_name}`",

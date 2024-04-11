@@ -1,4 +1,7 @@
 # discord.py bot template
+a discord.py bot template that I use for my bots.
+
+you're free to use this template if you like.
 
 ## Setup
 Need **Python 3.10+** for this bot template.\
