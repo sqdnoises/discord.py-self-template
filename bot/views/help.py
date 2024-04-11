@@ -8,6 +8,34 @@ from ..utils.help import *
 import discord
 from discord.ext import commands
 
+class CommandHelpView(discord.ui.View):
+    """View for the help of a single command"""
+
+    def __init__(self, ctx: Context, category: Cog, items: int = config.HELP_PAGE_ITEMS, timeout: float | None = None) -> None:
+        super().__init__(timeout=timeout)
+        self.ctx = ctx
+        self.bot = ctx.bot
+        
+        self.category = category
+        self.items = items
+        
+        if category is None:
+            self.category = self.bot.get_cog("Help")
+    
+    async def update_button(self) -> None:
+        button: discord.ui.Button = self.children[0]
+        button.label = button.label.format(category=self.category.qualified_name)
+        button.emoji = self.category.emoji
+    
+    @discord.ui.button(emoji="❔", label="View help for {category}", style=discord.ButtonStyle.grey, custom_id="view_help")
+    async def view_help(self, interaction: discord.Interaction, button: discord.ui.Button) -> None:
+        embed = await craft_help_embed(self.ctx, self.category, items=self.items)
+        view = HelpView(self.ctx, self.category, self.items, self.timeout)
+        await view.update_pages()
+        await view.update_buttons()
+        await view.update_categories()
+        await interaction.response.edit_message(embed=embed, view=view)
+
 class HelpView(discord.ui.View):
     """View for the help command"""
     
@@ -70,7 +98,7 @@ class HelpView(discord.ui.View):
         for cog in self.bot.cogs.values():
             cog: Cog
             
-            embed = await craft_help_embed(self.ctx, cog)
+            embed = await craft_help_embed(self.ctx, cog, items=self.items)
             if embed and not cog.hidden:
                 dropdown.options.append(discord.SelectOption(
                     label=cog.qualified_name,
@@ -116,7 +144,7 @@ class HelpView(discord.ui.View):
     async def categories_dropdown(self, interaction: discord.Interaction, select: discord.ui.Select) -> None:
         self.category = self.bot.get_cog(select.values[0])
         await self.update_pages()
-        embed = await craft_help_embed(self.ctx, self.category)
+        embed = await craft_help_embed(self.ctx, self.category, items=self.items)
         await self.update_buttons()
         await self.update_categories()
         await interaction.response.edit_message(embed=embed, view=self)
