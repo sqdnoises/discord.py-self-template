@@ -31,7 +31,7 @@ class Configuration(Cog):
         if new_prefix is None:
             await ctx.send(f"Current prefix: `{ctx.prefix}`.")
         
-        elif new_prefix == "default":
+        elif new_prefix.lower() == "default" or new_prefix.lower() == "reset":
             await self.update_prefix(ctx.guild.id, config.DEFAULT_PREFIX)
             await ctx.send(f"Prefix changed to `{config.DEFAULT_PREFIX}`.")
         
