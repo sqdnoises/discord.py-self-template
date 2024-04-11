@@ -92,7 +92,10 @@ async def craft_help_embed(ctx: Context, category_or_command: Cog | commands.Com
         )
     
     else:
-        if not await command.can_run(ctx):
+        try:
+            if not await command.can_run(ctx):
+                return None
+        except commands.MissingPermissions:
             return None
         
         embed = discord.Embed(

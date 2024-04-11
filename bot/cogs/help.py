@@ -37,6 +37,9 @@ class Help(Cog):
                 return await ctx.send(f"Command `{command}` not found.")
             
             embed = await craft_help_embed(ctx, cmd)
+            if not embed:
+                return await ctx.send(f"Command `{command}` not found.")
+            
             view = None
         
         await ctx.send(embed=embed, view=view)
