@@ -120,13 +120,24 @@ class Developer(Cog):
         await self.bot.invoke(new_ctx)
 
     @commands.command()
-    async def do(self, ctx: Context, times: int, *, command: str) -> None:
-        """Repeats a command a specified number of times"""
+    async def do(
+        self,
+        ctx: Context,
+        times: int,
+        channel: Optional[discord.TextChannel],
+        who: Optional[discord.Member | discord.User],
+        *,
+        command: str
+    ) -> None:
+        """Repeats a command a specified number of times optionally as another person optionally in another channel"""
         msg = copy.copy(ctx.message)
+        new_channel = channel or ctx.channel
+        msg.channel = new_channel
+        msg.author = who or ctx.author
         msg.content = ctx.prefix + command
-
+        
         new_ctx = await self.bot.get_context(msg, cls=type(ctx))
-
+        
         for i in range(times):
             await new_ctx.reinvoke()
 
