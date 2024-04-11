@@ -44,7 +44,7 @@ class Developer(Cog):
 
     @commands.command(aliases=["r", "re", "reload_all", "reload_extension", "reload_all_extensions"])
     async def reload(self, ctx: Context, *cogs: str):
-        """Reload an or all cogs."""
+        """Reload an or all cogs"""
         if len(cogs) == 0:
             extensions = [k for k in self.bot.extensions.keys()]
             
@@ -76,8 +76,7 @@ class Developer(Cog):
     
     @commands.command(aliases=["exts", "loaded", "loaded_extensions"])
     async def extensions(self, ctx: Context):
-        """List all loaded cogs."""
-        
+        """List all loaded cogs"""
         paginated_list = utils.paginate([f"`{k}`" for k in self.bot.extensions.keys()])
         extensions = [", ".join(group) for group in paginated_list]
         extensions = ",\n".join(extensions)
@@ -110,7 +109,7 @@ class Developer(Cog):
         *,
         command: str
     ):
-        """Run a command as another user optionally in another channel."""
+        """Run a command as another user optionally in another channel"""
         msg = copy.copy(ctx.message)
         new_channel = channel or ctx.channel
         msg.channel = new_channel
@@ -121,7 +120,7 @@ class Developer(Cog):
 
     @commands.command()
     async def do(self, ctx: Context, times: int, *, command: str):
-        """Repeats a command a specified number of times."""
+        """Repeats a command a specified number of times"""
         msg = copy.copy(ctx.message)
         msg.content = ctx.prefix + command
 
