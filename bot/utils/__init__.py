@@ -1,40 +1,38 @@
+"""
+This module contains all the utilities that would be needed in the bot
+
+Copyright (c) SqdNoises 2024-present
+Licensed under the MIT License
+https://github.com/sqdnoises/discord.py-bot-template
+"""
+
 import os
 import re
-from typing import Callable, List, Any
+import pkgutil
+from typing import Any, List, Callable
 
-import config
-from logger import logging
+__all__ = (
+    "list_modules",
+    "mprint",
+    "strip_color",
+    "code",
+    "cleanup_code",
+    "paginate",
+    "detect_platform",
+    "slice"
+)
 
-import aiohttp
-import discord
-from prisma import Prisma
-from discord.ext import commands
-
-class MockBot(commands.Bot):
-    prisma: Prisma
-
-async def get_prefix(bot: MockBot, message: discord.Message):
-    """Get the prefix for the bot"""
-    prisma = bot.prisma
+def list_modules(package: str | Any) -> list[str]:
+    """List all modules in a package"""
     
-    guild = await prisma.configuration.find_unique(where={"guild_id": message.guild.id})
+    if type(package) == str:
+        package = __import__(package)
     
-    if guild:
-        prefix = guild.prefix
+    modules = []
+    for importer, modname, ispkg in pkgutil.walk_packages(package.__path__, prefix=package.__name__+"."):
+        modules.append(modname)
     
-    else:
-        await prisma.prefixes.create(data={"guild_id": message.guild.id, "prefix": config.DEFAULT_PREFIX})
-        prefix = config.DEFAULT_PREFIX
-    
-    return commands.when_mentioned_or(prefix)(bot, message)
-
-def show_terminal_size():
-    try:
-        terminal = os.get_terminal_size()
-    except:
-        logging.warn("could not detect terminal size")
-    else:
-        logging.info(f"detected current terminal size: {terminal.columns}x{terminal.lines}")
+    return modules
 
 def mprint(text: str = "", fillchar: str = " ", end: str = "\n", flush: bool = False):
     """Print text in the middle of the terminal if possible, and normally if not"""
@@ -56,9 +54,12 @@ def strip_color(text: str) -> str:
     """Strip all color codes from a string"""
     return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
-def code(text: str, language: str = "py"):
+def code(text: str, language: str | None = None, ignore_whitespace: bool = False):
     """Return a code block version of the text provided"""
-    return f"```{language}\n{text}\n```"
+    if not ignore_whitespace and text.strip() == "":
+        return ""
+    
+    return f"```{language or ''}\n{text}\n```"
 
 def cleanup_code(content: str) -> str:
     """Automatically removes code blocks from the code."""
@@ -115,9 +116,3 @@ def detect_platform():
 def slice(text: str, max: int = 2000) -> List[str]:
     """Slice a message up into multiple messages"""
     return [text[i:i+max] for i in range(0, len(text), max)]
-
-async def get_raw_content_data(url: str, *args, **kwargs):
-    """Get raw content like files and media as bytes"""
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, ssl=True if url.lower().startswith("https") else False, *args, **kwargs) as response:
-            return await response.content.read()

@@ -1,0 +1,41 @@
+[build-system]
+requires = [
+    "setuptools",
+    "wheel"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bot-template"
+version = "1.0"
+authors = [
+    { name = "sqdnoises" }
+]
+description = "A template bot."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent"
+]
+dependencies = [
+    "prisma",
+    "psutil",
+    "pillow",
+    "discord.py",
+    "setuptools",
+    "python-dotenv",
+    "scikit-learn"
+]
+
+[project.urls]
+GitHub = "https://github.com/sqdnoises/discord.py-bot-template"
+
+[project.scripts]
+bot = "bot.__main__:start"
+run-bot = "bot.__main__:start"
+
+[tool.setuptools]
+py-modules = ["bot"]

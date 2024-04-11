@@ -35,6 +35,19 @@ __all__ = (
     "dim",
     "underline",
     
+    # Miscellaneous
+    "empty",
+    
+    # Custom Colors
+    "lime",
+    "orange",
+    "dark_orange",
+    
+    # Custom Background Colors
+    "bg_lime",
+    "bg_orange",
+    "bg_dark_orange",
+    
     # Colors
     "black",
     "red",
@@ -45,7 +58,7 @@ __all__ = (
     "cyan",
     "white",
     
-    # Bright colors
+    # Bright Colors
     "bright_black",
     "bright_red",
     "bright_green",
@@ -55,7 +68,7 @@ __all__ = (
     "bright_cyan",
     "bright_white",
     
-    # Background colors
+    # Background Colors
     "bg_black",
     "bg_red",
     "bg_green",
@@ -65,7 +78,7 @@ __all__ = (
     "bg_cyan",
     "bg_white",
     
-    # Bright background colors
+    # Bright Background Colors
     "bg_bright_black",
     "bg_bright_red",
     "bg_bright_green",
@@ -74,9 +87,6 @@ __all__ = (
     "bg_bright_magenta",
     "bg_bright_cyan",
     "bg_bright_white",
-    
-    # Custom colors
-    "lime",
 )
 
 def ansi(code: int) -> str:
@@ -91,8 +101,24 @@ def hex(hex: int) -> str:
     b = hex & 0xFF
     return rgb(r, g, b)
 
-lime = rgb(0, 255, 128)
+def bg_rgb(r: int, g: int, b: int) -> str:
+    return f"\033[48;2;{r};{g};{b}m"
 
+def bg_hex(hex: int) -> str:
+    r = hex >> 16
+    g = hex >> 8 & 0xFF
+    b = hex & 0xFF
+    return bg_rgb(r, g, b)
+
+lime = rgb(0, 255, 128)
+orange = rgb(255, 128, 0)
+dark_orange = rgb(128, 64, 0)
+
+bg_lime = bg_rgb(0, 255, 128)
+bg_orange = bg_rgb(255, 128, 0)
+bg_dark_orange = bg_rgb(128, 64, 0)
+
+empty = ""
 reset = ansi(0)
 bold = ansi(1)
 dim = ansi(2)

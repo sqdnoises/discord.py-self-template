@@ -1,13 +1,15 @@
-import config
-from classes import Bot, Context
+from ..        import config
+from ..classes import Bot, Cog, Context
 
 from discord.ext import commands
 
-class Configuration(commands.Cog):
-    """Bot configuration commands"""
+class Configuration(Cog):
+    """Bot configuration commands."""
 
     def __init__(self, bot: Bot) -> None:
         self.bot = bot
+        self.emoji = "⚙️"
+        self.short_description = "Bot configuration commands"
     
     async def update_prefix(self, guild_id: int, new_prefix: str) -> None:
         prisma = self.bot.prisma
@@ -22,8 +24,8 @@ class Configuration(commands.Cog):
     async def prefix(self, ctx: Context, *, new_prefix: str | None = None):
         """Show or change the prefix
         
-        **Permissions:**
-        - `Manage server`
+        User Permissions:
+        - Manage server
         """
         
         if new_prefix is None:

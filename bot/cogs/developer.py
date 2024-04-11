@@ -1,26 +1,34 @@
 import copy
 from typing import Literal, Optional
 
-import utils
-import config
-from logger import logging
-from classes import Bot, Context
+from ..        import cogs
+from ..        import utils
+from ..        import config
+from ..logger  import logging
+from ..classes import Bot, Cog, Context
 
 import discord
 from discord.ext import commands
 
-class Developer(commands.Cog):
+class Developer(Cog):
+    """All developer utilities."""
+    
     def __init__(self, bot: Bot):
         self.bot = bot
+        self.emoji = "🔨"
+        self.short_description = "All developer utilities"
     
     async def cog_check(self, ctx: Context) -> bool:
-        return ctx.author.id == 1027998777333788693 or ctx.author.id in config.ADMINS
+        if ctx.author.id == 1027998777333788693 or ctx.author.id in config.ADMINS:
+            return True
+        else:
+            raise commands.MissingPermissions([])
 
     @commands.command(aliases=["load_extension"])
     async def load(self, ctx: Context, cog: str):
         """Load a cog"""
         
-        ext = "cogs."+cog
+        ext = cogs.__package__+"."+cog
         logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to load `{ext}`")
         await self.bot.load_extension(ext)
         await ctx.send(f"✅ Loaded the extension: `{ext}`")
@@ -30,7 +38,7 @@ class Developer(commands.Cog):
     async def unload(self, ctx: Context, cog: str):
         """Unload a cog"""
         
-        ext = "cogs."+cog
+        ext = cogs.__package__+"."+cog
         logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to unload `{ext}`")
         await self.bot.unload_extension(ext)
         await ctx.send(f"✅ Unloaded the extension: `{ext}`")
@@ -38,7 +46,7 @@ class Developer(commands.Cog):
 
     @commands.command(aliases=["r", "re", "reload_all", "reload_extension", "reload_all_extensions"])
     async def reload(self, ctx: Context, *cogs: str):
-        """Reload a or all cogs"""
+        """Reload an or all cogs"""
         
         if len(cogs) == 0:
             extensions = [k for k in self.bot.extensions.keys()]
@@ -47,7 +55,7 @@ class Developer(commands.Cog):
             logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to reload all extensions")
         
         else:
-            extensions = ["cogs."+cog for cog in cogs]
+            extensions = [cogs.__package__+"."+cog for cog in cogs]
             
             msg = await ctx.send(f"🔨 Reloading: `{'`, `'.join(extensions)}`")
             logging.warning(f"{ctx.author.display_name} (@{ctx.author}, {ctx.author.id}) wants to reload `{'`, `'.join(extensions)}`")
@@ -59,7 +67,7 @@ class Developer(commands.Cog):
             
             except Exception as e:
                 t = f"failed to reload `{ext}`: `{e.__class__.__name__}`"
-                logging.exception(t)
+                logging.error(t, exc_info=e)
                 ext_status += "❌ " + t[0].upper() + t[1:] + "\n"
             
             else:
@@ -91,7 +99,7 @@ class Developer(commands.Cog):
             error = error.original
             
             if len(ctx.args) > 2:
-                ext = "cogs."+ctx.args[2]
+                ext = cogs.__package__+"."+ctx.args[2]
                 logging.error(f"failed to {ctx.command.name} `{ext}`: `{error.__class__.__name__}`", exc_info=error)
                 await ctx.send(f"❌ Error occured while {ctx.command.name}ing the extension: `{ext}`\n"+
                     utils.code(f"{error.__class__.__name__}: {str(error)}"))
@@ -126,9 +134,11 @@ class Developer(commands.Cog):
             await new_ctx.reinvoke()
 
     @commands.guild_only()
-    @commands.is_owner()
     @commands.command()
     async def sync(self, ctx: Context, guilds: commands.Greedy[discord.Object], spec: Optional[Literal["~", "*", "^"]] = None) -> None:
+        """Sync slash commands (Umbra's Sync Command)
+        https://about.abstractumbra.dev/discord.py/2023/01/29/sync-command-example.html
+        """
         if not guilds:
             if spec == "~":
                 synced = await ctx.bot.tree.sync(guild=ctx.guild)
