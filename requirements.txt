@@ -1,10 +1,9 @@
+pytz
 prisma
 psutil
 pillow
+requests
 discord.py
 setuptools
-python-dotenv
-
-# For color detection
-pillow
 scikit-learn
+python-dotenv

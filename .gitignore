@@ -6,6 +6,8 @@
 .env
 
 # database related
+database/
+*.db
 *-shm
 *-wal
 
