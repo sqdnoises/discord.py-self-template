@@ -28,7 +28,7 @@ Then remove `.git` (optional, but highly recommended)
 rm -rf .git # Linux/MacOS
 ```
 
-`./`**`.env`** template
+`./.env` template
 ```python
 TOKEN="Bot token"
 ```
