@@ -24,7 +24,11 @@ def craft_usage(ctx: Context, command: commands.Command) -> str:
 
 def craft_aliases(ctx: Context, command: commands.Command) -> str:
     """Create aliases text for a command"""
-    return f"***aliases**: {', '.join(f'{ctx.prefix}{alias}' for alias in command.aliases)}*" if command.aliases else ""
+    prefix = command.qualified_name.split()
+    prefix.pop(-1)
+    prefix = " ".join(prefix) + " "
+    
+    return f"***aliases**: {', '.join(f'{ctx.prefix}{prefix + alias if prefix.strip() else alias}' for alias in command.aliases)}*" if command.aliases else ""
 
 def craft_hidden(ctx: Context, command: commands.Command) -> str:
     """Create hidden command text for a command"""
@@ -64,7 +68,7 @@ async def craft_help_embed(
         )
 
         cmds = []
-        for command in bot.commands:
+        for command in bot.walk_commands():
             if command.cog == category and not command.hidden:
                 cmds.append(command)
 

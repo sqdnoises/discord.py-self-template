@@ -156,9 +156,11 @@ class SlashHelpView(discord.ui.View):
     
     @discord.ui.select(placeholder="Choose category...", min_values=1, max_values=1, custom_id="categories")
     async def categories_dropdown(self, interaction: discord.Interaction, select: discord.ui.Select) -> None:
+        await interaction.response.defer()
+        
         self.category = self.bot.get_cog(select.values[0])
         await self.update_pages()
         embed = await utils.slash_help.craft_slash_help_embed(self.bot, self.interaction, self.category, items=self.items)
         await self.update_buttons()
         await self.update_categories()
-        await interaction.response.edit_message(embed=embed, view=self)
+        await interaction.edit_original_response(embed=embed, view=self)

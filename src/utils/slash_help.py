@@ -12,6 +12,11 @@ import discord
 from discord import app_commands
 from discord.ext import commands
 
+__all__ = (
+    "craft_usage",
+    "craft_slash_help_embed"
+)
+
 def craft_usage(interaction: discord.Interaction, command: app_commands.Command) -> str:
     """Create usage for a command"""
     return f"/{command.qualified_name}"
