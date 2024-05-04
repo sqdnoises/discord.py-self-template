@@ -472,7 +472,7 @@ class Developer(Cog):
                                        f" -> {e}\n", "prolog")
                     await ctx.send(f"An error occured.\n"
                                    f"{error}")
-                    logging.error("error occured while sending exec failed embed", exc_info=e)
+                    logging.error("error occured while sending execution failed embed", exc_info=e)
 
             else:
                 t = time.monotonic() - t # in seconds
