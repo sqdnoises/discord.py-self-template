@@ -106,7 +106,7 @@ class Events(Cog):
         if guild_stats:
             await prisma.statistics.update(
                 where = {"guild_id": ctx.guild.id},
-                data = {"commands_used": guild_stats.commands_used + 1}
+                data = {"commands_used": {"increment": 1}}
             )
         
         else:

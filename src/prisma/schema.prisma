@@ -10,7 +10,7 @@ datasource db {
 
 model statistics {
   guild_id      BigInt @id @unique
-  commands_used Int    @default(0)
+  commands_used BigInt @default(0)
 }
 
 model configuration {

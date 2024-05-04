@@ -22,8 +22,8 @@ class Help(Cog):
         self.emoji = "❓"
         self.short_description = "Getting help on the bot"
         
-    @commands.command(aliases=["h", "commands"])
-    async def help(self, ctx: Context, command: str = None) -> None:
+    @commands.command(aliases=["h", "cmds", "commands"])
+    async def help(self, ctx: Context, *, command: str = None) -> None:
         """Shows this help page"""
         bot = self.bot
         

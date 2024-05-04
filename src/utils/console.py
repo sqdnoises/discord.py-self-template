@@ -8,7 +8,8 @@ import pkg_resources
 from logger import logging
 
 __all__ = (
-    "show_terminal_size",
+    "show_versions",
+    "show_terminal_size"
 )
 
 def show_versions():

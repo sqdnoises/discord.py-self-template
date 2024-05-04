@@ -124,7 +124,10 @@ class Logger:
         
         self.log("error", message)
     
-    def critical(self, message: str | Any) -> None:
+    def critical(self, message: str | Any, exc_info: Exception | None = None) -> None:
+        if exc_info:
+            message += "\n" + red + "".join(traceback.format_exception(exc_info)).rstrip("\n")
+        
         self.log("critical", message)
     
     def debug(self, message: str | Any) -> None:

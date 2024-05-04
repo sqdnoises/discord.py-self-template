@@ -138,14 +138,25 @@ class Bot(commands.Bot):
         exclude = config.COGS_EXCLUDE
         for module in utils.list_modules(cogs):
             if module in exclude or module.replace(cogs.__package__+".", "", 1) in exclude:
-                excluded.append(module)
+                excluded.append(module + f" {rgb(49, 49, 49)}(excluded in config){reset}")
                 continue
             
-            loaded.append(module)
-            await self.load_extension(module)
+            try:
+                await self.load_extension(module)
+            
+            except commands.NoEntryPointError:
+                logging.warn(f"excluding `{module}` because there is no entry point (no 'setup' function found)")
+                excluded.append(module + f" {rgb(49, 49, 49)}(no 'setup' function){reset}")
+            
+            except Exception as e:
+                logging.critical(f"excluding `{module}` because there was an error while loading it (this may cause unintended behaviour)", exc_info=e)
+                excluded.append(module + f" {rgb(49, 49, 49)}(error: {e.__class__.__name__}){reset}")
+            
+            else:
+                loaded.append(module)
         
         loaded_paginated = utils.paginate(loaded, 3)
-        excluded_paginated = utils.paginate(excluded, 3)
+        excluded_paginated = utils.paginate(excluded, 2)
         prefix_length = len(utils.strip_color(logging._prefix_handler("info")))
         
         loaded_str = f"the following cogs have been {underline}loaded{reset}:\n"
