@@ -59,13 +59,25 @@ class SlashHelpView(discord.ui.View):
     
     async def update_pages(self) -> None:
         self.page = 1
-        self.pages = utils.paginate([
-            command for command in self.bot.tree.walk_commands()
-            if self.bot.tree.get_cog(command) == self.category
-        ] + [
+        
+        all_cmds = [
             command for command in self.bot.walk_commands()
             if self.bot.tree.get_cog(command) == self.category
-        ], self.items)
+        ] + [
+            command for command in self.bot.tree.walk_commands()
+            if self.bot.tree.get_cog(command) == self.category
+        ]
+        cmds = []
+        def recurse(cmds_list: list[app_commands.Command, app_commands.Group, app_commands.AppCommandGroup]) -> None:
+            for cmd in cmds_list:
+                if isinstance(cmd, app_commands.Group):
+                    recurse(cmd.commands)
+                    continue
+                
+                cmds.append(cmd)
+        recurse(all_cmds)
+        
+        self.pages = utils.paginate(cmds, self.items)
     
     async def update_buttons(self) -> None:
         buttons: list[discord.ui.Button] = [child for child in self.children if child.type == discord.ComponentType.button]

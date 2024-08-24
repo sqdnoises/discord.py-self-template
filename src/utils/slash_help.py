@@ -55,8 +55,20 @@ async def craft_slash_help_embed(
             timestamp = discord.utils.utcnow()
         )
 
-        cmds = [command for command in bot.tree.get_commands() if bot.tree.get_cog(command) == category]
-        
+        all_cmds = [
+            command for command in bot.tree.walk_commands()
+            if bot.tree.get_cog(command) == category
+        ]
+        cmds = []
+        def recurse(cmds_list: list[app_commands.Command, app_commands.Group, app_commands.AppCommandGroup]) -> None:
+            for cmd in cmds_list:
+                if isinstance(cmd, app_commands.Group):
+                    recurse(cmd.commands)
+                    continue
+                
+                cmds.append(cmd)
+        recurse(all_cmds)
+
         cmds.sort(key=lambda command: command.qualified_name)
         paginated_commands: list[list[app_commands.Command | commands.HybridCommand]] = utils.paginate(cmds, items)
         pages = len(paginated_commands)
