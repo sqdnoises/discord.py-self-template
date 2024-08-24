@@ -15,6 +15,7 @@ from logger import logging
 from termcolors import *
 from termcolors import rgb
 
+import prisma
 import discord
 from prisma import Prisma
 from discord import app_commands
@@ -33,7 +34,7 @@ class Context(commands.Context):
     
     def __init__(self, *args, **kwargs) -> None: # initialize the class
         super().__init__(*args, **kwargs)
-        self.voice: Optional[discord.VoiceState] = self.author.voice
+        self.voice: Optional[discord.VoiceState] = self.author.voice if hasattr(self.author, "voice") else None
         self.cleaned_up_code = utils.cleanup_code(self.message.content)
         self.output: bool = True # for exec
     
@@ -59,19 +60,19 @@ class Context(commands.Context):
         else:
             return await self.send(embed=board)
     
-    async def yes(self) -> discord.Message:          return await self.react("✅")
-    async def tick(self) -> discord.Message:         return await self.react("✅")
-    async def check(self) -> discord.Message:        return await self.react("✅")
-    async def green(self) -> discord.Message:        return await self.react("✅")
-    async def success(self) -> discord.Message:      return await self.react("✅")
+    async def yes(self) -> discord.Reaction:          return await self.react("✅")
+    async def tick(self) -> discord.Reaction:         return await self.react("✅")
+    async def check(self) -> discord.Reaction:        return await self.react("✅")
+    async def green(self) -> discord.Reaction:        return await self.react("✅")
+    async def success(self) -> discord.Reaction:      return await self.react("✅")
 
-    async def x(self) -> discord.Message:            return await self.react("❌")
-    async def no(self) -> discord.Message:           return await self.react("❌")
-    async def red(self) -> discord.Message:          return await self.react("❌")
-    async def fail(self) -> discord.Message:         return await self.react("❌")
-    async def cross(self) -> discord.Message:        return await self.react("❌")
-    async def failure(self) -> discord.Message:      return await self.react("❌")
-    async def unsuccessful(self) -> discord.Message: return await self.react("❌")
+    async def x(self) -> discord.Reaction:            return await self.react("❌")
+    async def no(self) -> discord.Reaction:           return await self.react("❌")
+    async def red(self) -> discord.Reaction:          return await self.react("❌")
+    async def fail(self) -> discord.Reaction:         return await self.react("❌")
+    async def cross(self) -> discord.Reaction:        return await self.react("❌")
+    async def failure(self) -> discord.Reaction:      return await self.react("❌")
+    async def unsuccessful(self) -> discord.Reaction: return await self.react("❌")
 
 class CommandTree(app_commands.CommandTree):
     """Represents a container that holds application command information."""
@@ -132,6 +133,9 @@ class Bot(commands.Bot):
         mprint(f"{bright_green}running on{reset} {yellow}python{reset} {blue}{sys.version.split()[0]}{reset}; {yellow}discord.py{reset} {blue}{pkg_resources.get_distribution('discord.py').version}{reset}")
         mprint()
         
+        await self.connect_db()
+        logging.info("connected to database ./database/database.db")
+        
         loaded = []
         excluded = []
         
@@ -176,13 +180,14 @@ class Bot(commands.Bot):
         logging.info(f"user: {self.user} ({self.user.id})")
         
         logging.info(f"invite: https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot+applications.commands")
-                
-        await self.connect_db()
-        logging.info("connected to database ./database/database.db")
     
     async def get_context(self, message: discord.Message, *, cls: commands.Context = Context) -> Context:
         """Get Context from a discord.Message"""
         return await super().get_context(message, cls=cls)
+
+    async def get_context_from_interaction(self, interaction: discord.Interaction, *, cls: commands.Context = Context) -> Context:
+        """Get Context from a discord.Interaction"""
+        return await cls.from_interaction(interaction)
     
     def create_activity(self, name: str, type: Literal["playing", "streaming", "listening", "watching"] = "playing", *args, **kwargs) -> discord.Activity:
         """Create an activity for a given type"""

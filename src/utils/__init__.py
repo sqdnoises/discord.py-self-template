@@ -9,7 +9,7 @@ For more information, please check the provided LICENSE file.
 import os
 import re
 import pkgutil
-from typing import Any, List, Callable
+from typing import Any, Iterable, Callable
 
 __all__ = (
     "list_modules",
@@ -111,6 +111,6 @@ def detect_platform():
     else:
         return "other"
 
-def slice(text: str, max: int = 2000) -> List[str]:
-    """Slice a message up into multiple messages"""
-    return [text[i:i+max] for i in range(0, len(text), max)]
+def slice(iter: Iterable, max: int = 2000) -> Iterable[Iterable]:
+    """Slice an iterable up into multiple iterables"""
+    return [iter[i:i+max] for i in range(0, len(iter), max)]
