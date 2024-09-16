@@ -1,9 +1,14 @@
 # cache and virtual environments
-**/__pycache__
+__pycache__/
+*.pyc
 .venv/
 
 # environmental variables
 .env
+
+# logs
+logs/
+*.log
 
 # database related
 database/
