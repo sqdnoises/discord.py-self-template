@@ -3,7 +3,8 @@ Bot-related utilities.
 """
 
 import config
-import objects
+from typing  import Optional
+from classes import Bot, BasicPrefix
 
 import aiohttp
 import discord
@@ -14,23 +15,18 @@ __all__ = (
     "get_raw_content_data"
 )
 
-async def get_prefix(bot: objects.MockBot, message: discord.Message):
+async def get_prefix(bot: Bot, message: discord.Message) -> BasicPrefix:
     """Get the prefix for the bot"""
-    prisma = bot.prisma
-    
-    guild = await prisma.configuration.find_unique(where={"guild_id": message.guild.id})
-    
-    if guild:
-        prefix = guild.prefix
-    
+    prefix = config.DEFAULT_PREFIX
+    if config.MENTION_IS_ALSO_PREFIX:
+        return commands.when_mentioned_or(prefix)(bot, message)
     else:
-        await prisma.configuration.create(data={"guild_id": message.guild.id, "prefix": config.DEFAULT_PREFIX})
-        prefix = config.DEFAULT_PREFIX
-    
-    return commands.when_mentioned_or(prefix)(bot, message)
+        return prefix
 
-async def get_raw_content_data(url: str, *args, **kwargs):
+async def get_raw_content_data(url: str, *args, session: Optional[aiohttp.ClientSession] = None, **kwargs) -> bytes:
     """Get raw content like files and media as bytes"""
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, ssl=True if url.lower().startswith("https") else False, *args, **kwargs) as response:
-            return await response.content.read()
+    if session is None:
+        session = aiohttp.ClientSession()
+    
+    async with session.get(url, ssl=True if url.lower().startswith("https") else False, *args, **kwargs) as response:
+        return await response.content.read()

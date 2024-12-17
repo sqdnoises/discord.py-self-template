@@ -1,4 +1,5 @@
 {
+    "python.analysis.typeCheckingMode": "basic",
     "python.REPL.enableREPLSmartSend": false,
     "vscord.app.privacyMode.enable": false,
     "material-icon-theme.folders.associations": {
