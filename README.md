@@ -8,8 +8,6 @@
 a discord.py bot template that I use for my bots.\
 you're free to use this template if you like.
 
-> I'm planning on doing a lot of changes in the future because this shit is not typehinted a bit and is very ass
-
 ## License
 You must have received a copy of the [LICENSE](LICENSE) file with this source code.\
 This source code is licensed under the **MIT License**.
@@ -17,35 +15,58 @@ This source code is licensed under the **MIT License**.
 </div>
 
 ## Setup
-Need **Python 3.10+** for this bot template.\
-**NOTE:** In this section, `python3` would be `python` or just `py` on **Windows**.
+**Python 3.10+** should work for this bot. However it is recommended to use **Python 3.12.x**.\
 
-First of all, git clone this repository
+> [!NOTE]
+> In this section, `python3` would be `python` or just `py` on **Windows** platform.
+
+> [!WARNING]
+> **Python 3.13+ does not work as of when this code was created.**
+
+### clone repo
+First of all, git clone this repository:
 ```bash
-git clone git@github.com:sqdnoises/discord.py-bot-template
+git clone git@github.com:sqdnoises/discord.py-bot-template.git      # SSH
+git clone https://github.com/sqdnoises/discord.py-bot-template.git  # HTTPS
 ```
 
-Then remove `.git` (optional, but highly recommended)
+### reinitialize git
+Then reinitialize git `.git` (optional, do this if you are starting a new project)
 ```bash
-rm -rf .git # Linux/MacOS
+rm -rf .git  # Linux
+git init
+git branch -M main
 ```
 
-`./.env` template
+#### set remote
+Set the remote aswell while you are reinitializing git for a new project.
+```bash
+git remote add origin git@github.com:user/repo.git      # SSH
+git remote add origin https://github.com/user/repo.git  # HTTPS
+```
+
+Make sure to replace `user` with your GitHub username and `repo` with your repository name.
+
+### create a `.env` file
+`.env` template
 ```python
-TOKEN="Bot token"
+TOKEN="discord bot token"
 ```
 
-### venv (optional) (For Linux/MacOS)
+This file contains secret environmental variables that are not meant to be shared with anyone.
+The bot uses the `TOKEN` variable to login into the Discord bot.
+
+### venv (For Linux)
 On `bash`:
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-### venv (optional) (For Windows)
+### venv (For Windows, optional but highly recommended)
 On `powershell`:
 ```powershell
-py -m venv venv
+py -m venv .venv
 & .\venv\Scripts\activate
 ```
 
@@ -60,9 +81,32 @@ cd src
 prisma db push
 ```
 
+### setup config
+Open [`src/config.py`](src/config.py) in the editor of your choice and edit the config variables as needed.
+
+Make sure you update `ADMINS` and `LOG_CHANNEL` to the appropriate values.
+
+### setup emojis
+Upload the emojis from [`assets/emojis`](assets/emojis/) to the Discord bot's dashboard's emoji section and copy and paste the appropriate emoji markdown values in [`src/emojis.py`](src/emojis.py).
+
 ### running
 ```bash
-source .venv/bin/activate # (optional) For Linux/MacOS
+source .venv/bin/activate  # For Linux
+# OR
+& .\.venv\Scripts\activate  # For Windows (optional)
+
 cd src
-python3 bot.py # py or python bot.py on Windows
+python3 bot.py  # py or python bot.py on Windows
 ```
+
+### post-run
+Since the bot's profile has been set up for the first time, you need to tell Discord that your bot has slash commands.
+For this you need to use `!sync` only once after running the bot for the first time in the server it's in.
+
+This will synchronise all the slash commands in the code on Discord. Please restart your Discord after this step to reload all the slash command data and show the bot's slash commands when you start typing with `/`.
+
+## `/ping` command issues on a Linux host
+If you host the bot on linux and use the `/ping` command, you will likely see the bot think forever or produce an error and see an `Permission Error` error in the console.
+Linux uses a kernel parameter that restricts who can create ping sockets.
+
+For troubleshooting, please refer to: [<kbd> kyan001/ping3/TROUBLESHOOTING.md </kbd>](https://github.com/kyan001/ping3/blob/master/TROUBLESHOOTING.md)

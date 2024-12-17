@@ -1,9 +1,18 @@
-pytz
-prisma
-psutil
+# Image Processing
+numpy
 pillow
-requests
-discord.py
-setuptools
 scikit-learn
+
+# Interacting with API
+ping3
+aiohttp
+requests
+
+# Database
+prisma
+
+# Discord and Environment Management
+discord.py
+psutil
 python-dotenv
+setuptools

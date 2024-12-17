@@ -8,12 +8,6 @@ datasource db {
   url      = "file:../database/database.db"
 }
 
-model statistics {
-  guild_id      BigInt @id @unique
-  commands_used BigInt @default(0)
-}
-
-model configuration {
-  guild_id BigInt @id @unique
-  prefix   String @default("!")
+model Dummy { // To let prisma be able to generate and push
+  id  Int  @id @default(autoincrement())
 }

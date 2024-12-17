@@ -8,15 +8,15 @@ import pkg_resources
 from logger import logging
 
 __all__ = (
-    "show_versions",
-    "show_terminal_size"
+    "print_versions",
+    "print_terminal_size"
 )
 
-def show_versions():
+def print_versions():
     logging.info(f"python {sys.version}")
     logging.info(f"discord.py {pkg_resources.get_distribution('discord.py').version}")
 
-def show_terminal_size():
+def print_terminal_size():
     """Log the terminal size to console"""
     
     try:
