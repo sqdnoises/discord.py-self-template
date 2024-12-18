@@ -15,7 +15,7 @@ This source code is licensed under the **MIT License**.
 </div>
 
 ## Setup
-**Python 3.10+** should work for this bot. However it is recommended to use **Python 3.12.x**.\
+**Python 3.10+** should work for this bot. However it is recommended to use any **Python 3.12** version.
 
 > [!NOTE]
 > In this section, `python3` would be `python` or just `py` on **Windows** platform.
