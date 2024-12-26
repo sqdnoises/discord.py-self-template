@@ -67,7 +67,7 @@ source .venv/bin/activate
 On `powershell`:
 ```powershell
 py -m venv .venv
-& .\venv\Scripts\activate
+& .\.venv\Scripts\activate
 ```
 
 ### install requirements
