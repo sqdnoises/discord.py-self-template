@@ -20,9 +20,6 @@ This source code is licensed under the **MIT License**.
 > [!NOTE]
 > In this section, `python3` would be `python` or just `py` on **Windows** platform.
 
-> [!WARNING]
-> **Python 3.13+ does not work as of when this code was created.**
-
 ### clone repo
 First of all, git clone this repository:
 ```bash
