@@ -16,3 +16,7 @@ discord.py
 psutil
 python-dotenv
 setuptools
+
+# Compatibility
+# This makes discord.py work on Python 3.13
+audioop-lts; python_version>="3.13"
