@@ -32,11 +32,8 @@ class Developer(Cog):
         self._last_result = None
     
     async def cog_check(self, ctx: Context) -> bool:
-        if checks.is_admin(ctx):
-            return True
-        else:
-            return False
-
+        return checks.is_admin(ctx)
+    
     @commands.command(aliases=["load_extension"])
     async def load(self, ctx: Context, cog: str) -> None:
         """Load a cog"""
@@ -45,7 +42,7 @@ class Developer(Cog):
         await self.bot.load_extension(ext)
         await ctx.send(f"✅ Loaded the extension: `{ext}`")
         logging.info(f"successfully loaded `{ext}`")
-
+    
     @commands.command(aliases=["unload_extension"])
     async def unload(self, ctx: Context, cog: str) -> None:
         """Unload a cog"""
@@ -54,7 +51,7 @@ class Developer(Cog):
         await self.bot.unload_extension(ext)
         await ctx.send(f"✅ Unloaded the extension: `{ext}`")
         logging.info(f"successfully unloaded `{ext}`")
-
+    
     @commands.command(aliases=["r", "re", "reload_all", "reload_extension", "reload_all_extensions"])
     async def reload(self, ctx: Context, *cogs: str) -> None:
         """Reload an or all cogs"""
@@ -96,7 +93,7 @@ class Developer(Cog):
         
         await ctx.send("All loaded extensions:\n"+
                        extensions)
-
+    
     @load.error
     @unload.error
     @reload.error
@@ -343,7 +340,7 @@ class Developer(Cog):
                     text = f"Requested by {ctx.author}",
                     icon_url = ctx.author.display_avatar
                 )
-
+                
                 self._last_result = e
                 logging.error(f"failed at `exec()` ({ctx.clean_prefix}exec by {ctx.author.display_name} (@{ctx.author.name}, id: {ctx.author.id}))", exc_info=e)
                 try:
@@ -419,7 +416,7 @@ class Developer(Cog):
                 logging.error(f"EXECUTION FAILED! output of `exec` {ctx.clean_prefix}exec called by {ctx.author.display_name} (@{ctx.author.name}, id: {ctx.author.id})\n"
                               f"{output}")
                 logging.error(f"execution failed ({ctx.clean_prefix}exec by {ctx.author.display_name} (@{ctx.author.name}, id: {ctx.author.id}))", exc_info=e)
-
+                
                 try:
                     await ctx.send(embed=embed)
                 except discord.HTTPException:
