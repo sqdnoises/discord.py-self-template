@@ -1,8 +1,8 @@
 """
-## `discord.py` bot template
-a discord.py bot template that I use for my bots.
+## `discord.py-self` bot template
+a discord.py-self bot template that might come in handy for some people.
 
-Copyright (c) 2023-present SqdNoises
+Copyright (c) 2025-present SqdNoises
 Licensed under the MIT License
 For more information, please check the provided LICENSE file.
 """

@@ -1,13 +1,12 @@
 from typing import (
     Any, Iterable,
-    Callable, Awaitable, Coroutine,
+    Callable, Awaitable,
     TypeVar, ParamSpec
 )
 
 from classes.bot         import Bot
 from classes.cog         import Cog
 from classes.context     import Context
-from classes.commandtree import CommandTree
 
 from discord import Message
 
@@ -16,7 +15,6 @@ __all__ = (
     "CogT",
     "ContextT",
     "ContextT_co",
-    "CommandTreeT",
     "BasicPrefix",
     "SyncPrefixFunc",
     "AsyncPrefixFunc",
@@ -33,7 +31,6 @@ BotT         = TypeVar("BotT",         bound=Bot,        covariant=True)
 CogT         = TypeVar("CogT",         bound=Cog                       )
 ContextT     = TypeVar("ContextT",     bound=Context                   )
 ContextT_co  = TypeVar("ContextT_co",  bound=Context,    covariant=True)
-CommandTreeT = TypeVar("CommandTreeT", bound=CommandTree               )
 
 BasicPrefix     = str | Iterable[str]
 SyncPrefixFunc  = Callable[[Bot, Message], BasicPrefix]

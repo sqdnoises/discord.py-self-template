@@ -85,9 +85,7 @@ def strip_color(text: str) -> str:
 
 def code(text: str, language: str | None = None, ignore_whitespace: bool = False) -> str:
     """Return a code block version of the text provided"""
-    if not ignore_whitespace and text.strip() == "":
-        return ""
-    
+    if not ignore_whitespace and text.strip() == "": return ""
     return f"```{language or ''}\n{text}\n```"
 
 def error(e: Exception, *, include_module: bool = False) -> str:

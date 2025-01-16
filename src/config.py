@@ -21,10 +21,10 @@
 #                          `@mention help` would do the same thing as `!help`
 # ADMINS                 - A comma seperated list of Discord user IDs who will have full control
 #                          of the bot (access to developer cog and all commands)
-BOT_NAME = "template bot"  # Only used in logs
-DEFAULT_PREFIX = "!"
+BOT_NAME = "template selfbot"  # Only used in logs
+DEFAULT_PREFIX = "selfbot:"
 MENTION_IS_ALSO_PREFIX = True
-ADMINS = [1077982815070728223]   # for running developer commands
+ADMINS = [1077982815070728223]   # for access to running developer commands
 
 # DEBUG - Debug mode, useful for printing more information and receiving debug messages
 #         in the logs channel. Mostly used for debugging purposes to fix a bug by
@@ -37,9 +37,6 @@ DEBUG = True
 #                     Save path: ./logs/discord/
 SAVE_CUSTOM_LOGS = True
 SAVE_DISCORD_LOGS = True
-
-# LOG_CHANNEL - A channel ID which the bot can see where bot logs are sent
-LOG_CHANNEL = 1318631693929680896
 
 # LOG_COMMANDS_TO_CONSOLE           - Log every text and slash command being used by a
 #                                     user to console
@@ -58,11 +55,14 @@ LOG_NOT_FOUND_COMMANDS_TO_CONSOLE = True
 #                              command that does not exist. 
 # \n is a newline.
 # The value can be set to None (without the quotes) to disable it.
-MISSING_ARGUMENT_MESSAGE = "Missing argument `{argument}` of type `{type}`.\nFor more information refer to `{prefix}help {command.qualified_name}`."
-NO_PERMISSIONS_MESSAGE = "You don't have permissions to use this command."
-BOT_NO_PERMISSIONS_MESSAGE = ("I'm missing permissions to run this command.\n"
-                              "Permissions required: {joined_permissions_code}")
-COMMAND_NOT_FOUND_MESSAGE = "Command `{ctx.prefix}{command}` not found."
+MISSING_ARGUMENT_MESSAGE = "Missing argument `{argument}` of type `{type}`.\nFor more information refer to `{clean_prefix}help {command.qualified_name}`."
+NO_PERMISSIONS_MESSAGE = None
+# NO_PERMISSIONS_MESSAGE = "You don't have permissions to use this command."
+BOT_NO_PERMISSIONS_MESSAGE = None
+# BOT_NO_PERMISSIONS_MESSAGE = ("I'm missing permissions to run this command.\n"
+#                               "Permissions required: {joined_permissions_code}")
+COMMAND_NOT_FOUND_MESSAGE = None
+# COMMAND_NOT_FOUND_MESSAGE = "Command `{ctx.clean_prefix}{command}` not found."
 
 # ITEMS_PER_PAGE - The amount of items to show in any sort of command with multiple pages
 ITEMS_PER_PAGE = 5
