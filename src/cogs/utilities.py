@@ -1,21 +1,19 @@
 import asyncio
-from typing import(
+from typing import (
     TYPE_CHECKING,
     Literal, Iterable
 )
 
 import utils
-from classes         import Bot, Cog
-from views.utilities import InstallView
+from classes import Bot, Cog, Context
 
 import psutil
 from ping3 import ping
 
-import discord
-from discord import app_commands
+from discord.ext import commands
 
 class Utilities(Cog):
-    """Essential tools like `/ping`, `/statistics`, `/install`."""
+    """Essential tools like ping & statistics."""
     
     def __init__(self, bot: Bot) -> None:
         self.bot = bot
@@ -48,66 +46,41 @@ class Utilities(Cog):
             for domain, ping in zip(domains, pings)
         }
     
-    @app_commands.command(name="ping", description="Check the latency of the bot and the services being used")
-    @app_commands.allowed_installs(guilds=True, users=True)
-    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    async def ping(self, interaction: discord.Interaction) -> None:
-        # Defer the response
-        ephemeral = False
-        if isinstance(interaction.channel, discord.abc.PrivateChannel):
-            ephemeral = True
-        await interaction.response.defer(ephemeral=ephemeral)
+    @commands.command(aliases=["latency"])
+    async def ping(self, ctx: Context) -> None:
+        """Check the latency of the bot and the services being used"""
         
-        def add_ping_field(name: str, latency: float | Literal[False] | None) -> discord.Embed:
+        def format_ping_line(name: str, latency: float | Literal[False] | None) -> str:
             if latency is None:
-                value = f"`{self.get_latency_circle(None)} Unreachable`"
+                value = f"{self.get_latency_circle(None)} Unreachable"
             elif latency is False:
-                value = f"`{self.get_latency_circle(None)} Error`"
+                value = f"{self.get_latency_circle(None)} Error"
             else:
                 ping_text = f"{round(latency*1000)}ms" if latency < 1000 else f"{latency:.2f}s"
-                value = f"`{self.get_latency_circle(latency)} " + ping_text + "`"
+                value = f"{self.get_latency_circle(latency)} {ping_text}"
             
-            return embed.add_field(
-                name = name,
-                value = value
-            )
+            return f"**{name}:** `{value}`"
         
-        # Create the embed
-        embed = discord.Embed(
-            title = "Pong! 🏓",
-            color = discord.Color.dark_green(),
-            timestamp = discord.utils.utcnow()
-        )
+        # Create the text response
+        response_lines = []
         
         domains = {
             "discord.com": "Discord"
         }
         
         pings = await self.measure_ping(domains)
-        add_ping_field(list(domains.values())[0], pings.pop(list(domains.keys())[0]))
-        
-        bot_ping_text = f"{round(interaction.client.latency*1000)}ms" if interaction.client.latency < 1000 else f"{interaction.client.latency:.2f}s"
-        embed.add_field(
-            name = "Discord WS Latency",
-            value = f"`{self.get_latency_circle(interaction.client.latency)} " + bot_ping_text + "`"
-        )
+        response_lines.append(format_ping_line(list(domains.values())[0], pings.pop(list(domains.keys())[0])))
+        response_lines.append(format_ping_line("Discord WS Latency", self.bot.latency))
         
         for domain, ping in pings.items():
-            add_ping_field(domains[domain], ping)
+           response_lines.append(format_ping_line(domains[domain], ping))
         
-        for i in range((len(embed.fields)//2)):
-            embed.insert_field_at(
-                i*2+2+i,
-                name = "",
-                value = ""
-            )
-        
-        await interaction.followup.send(embed=embed)
+        response_lines.append("-# **Pong!** 🏓")
+        await ctx.reply("\n".join(response_lines), mention_author=False)
     
-    @app_commands.command(name="statistics", description="Statistics about the bot")
-    @app_commands.allowed_installs(guilds=True, users=True)
-    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    async def statistics(self, interaction: discord.Interaction) -> None:
+    @commands.command(aliases=["stats"])
+    async def statistics(self, ctx: Context) -> None:
+        """Statistics about the bot"""
         if TYPE_CHECKING and (
             self.bot.uptime is None
             or self.bot.user is None
@@ -115,71 +88,22 @@ class Utilities(Cog):
             # to satisfy the typechecker
             return
         
-        embed = discord.Embed(
-            title = f"🌟 {self.bot.user.display_name} Statistics",
-            timestamp = discord.utils.utcnow(),
-            color = discord.Color.dark_green()
-        )
-        
-        embed.add_field(
-            name = "Servers",
-            value = f"`{len(self.bot.guilds):,}`"
-        )
-        
-        embed.add_field(
-            name = "Users",
-            value = f"`{len(self.bot.users):,}`"
-        )
-        
-        embed.add_field(
-            name = "Platform",
-            value = f"`{utils.detect_platform()}`"
-        )
-        
         memory_usage = self.process.memory_full_info().uss / 1024**2
         cpu_count = psutil.cpu_count()
         cpu_usage = self.process.cpu_percent() / (cpu_count or 1)
         
-        embed.add_field(
-            name = "Process",
-            value = f"`{cpu_usage:.2f}%` (cpu)\n"
-                    f"`{round(memory_usage)} MiB` (memory)\n"
-                    f"up since <t:{int(self.bot.uptime.timestamp())}:R>"
+        # Create the text response
+        response = (
+            f"## 🌟 **{self.bot.user.display_name}'s Statistics**\n"
+            f"**Serving:** `{len(self.bot.guilds):,} servers` & `{len(self.bot.users):,} users`\n"
+            f"**Platform:** `{utils.detect_platform()}`\n"
+            f"**Process:**  \n"
+            f" - CPU: `{cpu_usage:.2f}%`\n"
+            f" - Memory: `{round(memory_usage)} MiB`\n"
+            f" - Uptime: up since <t:{int(self.bot.uptime.timestamp())}:R>"
         )
         
-        embed.add_field(
-            name = "Ping",
-            value = f"Check with {self.bot.slash_mention('ping')}"
-        )
-        
-        embed.set_thumbnail(
-            url = self.bot.user.display_avatar
-        )
-        
-        ephemeral = False
-        if isinstance(interaction.channel, discord.abc.PrivateChannel):
-            ephemeral = True
-        await interaction.response.send_message(embed=embed, ephemeral=ephemeral)
-    
-    @app_commands.command(name="install", description="Provide a link to install the bot in a user or invite it to a server")
-    @app_commands.allowed_installs(guilds=True, users=True)
-    @app_commands.allowed_contexts(guilds=True, dms=True, private_channels=True)
-    async def install(self, interaction: discord.Interaction) -> None:
-        if TYPE_CHECKING and (self.bot.user is None or self.bot.application_id is None):
-            return # to satisfy the typechecker
-        
-        embed = discord.Embed(
-            title = f"Install {self.bot.user.display_name}",
-            description = f"Click the buttons below to add **{self.bot.user.display_name}** in your apps and use it anywhere or invite it to your server.",
-            color = discord.Color.dark_green()
-        )
-        
-        embed.set_thumbnail(
-            url = self.bot.user.display_avatar
-        )
-        
-        view = InstallView(self.bot.application_id)
-        await interaction.response.send_message(embed=embed, view=view)
+        await ctx.reply(response, mention_author=False)
 
 async def setup(bot: Bot) -> None:
     await bot.add_cog(Utilities(bot))

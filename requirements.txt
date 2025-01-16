@@ -12,7 +12,7 @@ requests
 prisma
 
 # Discord and Environment Management
-discord.py
+git+https://github.com/dolfies/discord.py-self.git
 psutil
 python-dotenv
 setuptools

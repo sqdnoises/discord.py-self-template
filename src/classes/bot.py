@@ -14,7 +14,6 @@ from logger              import logging
 from termcolors          import *
 from termcolors          import rgb
 from classes.context     import Context
-from classes.commandtree import CommandTree
 
 if TYPE_CHECKING:
     from classes.custom_types import (
@@ -25,7 +24,6 @@ if TYPE_CHECKING:
 from prisma import Prisma
 
 import discord
-from discord     import app_commands
 from discord.ext import commands
 
 __all__ = (
@@ -34,35 +32,13 @@ __all__ = (
 
 class Bot(commands.Bot):
     """The main bot class which handles everything, including handling of events, commands, interactions, cogs, extensions, etc. and the bot itself."""
-    tree: CommandTree
     uptime: datetime | None
     prisma: Prisma
-    log_channel: discord.TextChannel | None
-    log_channel_id: int
-    all_app_commands: dict[str, app_commands.AppCommand]
     
-    def __init__(
-        self,
-        command_prefix: "PrefixType",
-        *args,
-        intents: discord.Intents = discord.Intents.all(),
-        tree_cls: type[app_commands.CommandTree] = CommandTree,
-        **kwargs
-    ) -> None:
-        super().__init__(
-            command_prefix = command_prefix,
-            intents = intents,
-            tree_cls = tree_cls,
-            *args,
-            **kwargs
-        )
+    def __init__(self, command_prefix: "PrefixType", *args, **kwargs) -> None:
+        super().__init__(command_prefix=command_prefix, *args, **kwargs, help_command=commands.DefaultHelpCommand())
         self.uptime = None
         self.prisma = Prisma(auto_register=True)
-        
-        self.all_commands = {}
-        
-        self.log_channel_id = config.LOG_CHANNEL
-        self.log_channel = None
     
     async def connect_db(self) -> None:
         await self.prisma.connect()
@@ -75,7 +51,7 @@ class Bot(commands.Bot):
         
         mprint()
         mprint(f"{white}~{reset} {bold}{green}{config.BOT_NAME.upper()}{reset} {white}~{reset}")
-        mprint(f"{bright_green}running on{reset} {yellow}python{reset} {blue}{sys.version.split()[0]}{reset}; {yellow}discord.py{reset} {blue}{pkg_resources.get_distribution('discord.py').version}{reset}")
+        mprint(f"{bright_green}running on{reset} {yellow}python{reset} {blue}{sys.version.split()[0]}{reset}; {yellow}discord.py{reset} {blue}{pkg_resources.get_distribution('discord.py-self').version}{reset}")
         mprint()
         
         await self.connect_db()
@@ -124,61 +100,17 @@ class Bot(commands.Bot):
         if TYPE_CHECKING and self.user is None:
             return  # to satisfy the type checker
         
-        await self.update_app_commands()
-        logging.info(f"app commands loaded: {len(self.all_app_commands)}")
-        
         logging.info("logged in successfully")
         logging.info(f"user: {self.user} ({self.user.id})")
-        logging.info(f"invite: https://discord.com/oauth2/authorize?client_id={self.user.id}&permissions=8&scope=bot+applications.commands")
-        
-        logging.info(f"getting log channel with id {self.log_channel_id}")
-        channel = await self.fetch_channel(self.log_channel_id)
-        
-        if isinstance(channel, discord.TextChannel):
-            self.log_channel = channel
-        else:
-            logging.critical(f"log channel with id {self.log_channel_id} is not a text channel, log_channel not set")
-        
-        if not self.log_channel:
-            logging.critical(f"log channel with id {self.log_channel_id} not found. this can cause problems.")
-        else:
-            logging.info(f"log channel: #{self.log_channel.name} (id: {self.log_channel.id})")
-        
-        if TYPE_CHECKING and (
-            self.log_channel is None
-            or self.user is None
-        ):
-            # to satisfy the typechecker (aka epic gaslight)
-            return
-        
-        try:
-            await self.log_channel.send(f"**{self.user.name}** logged in successfully", silent=True)
-        except Exception as e:
-            logging.critical(f"could not send log message to log channel with id {self.log_channel_id} due to exception:", exc_info=e)
-    
-    async def update_app_commands(self) -> None:
-        """Update app commands"""
-        logging.debug("fetching app commands...")
-        self.all_app_commands = {
-            cmd.name: cmd
-            for cmd in await self.tree.fetch_commands()
-        }
-        logging.debug(f"app commands fetched ({len(self.all_app_commands)})")
-    
-    def slash_mention(self, command: str) -> str:
-        if command.startswith("/"):
-            command = command[1:]
-        parent = command.split(maxsplit=1)[0]
-        return f"</{command}:{self.all_app_commands[parent].id}>" if self.all_app_commands.get(parent) else f"`/{command}`"
     
     async def get_context(self, message: discord.Message, *, cls: type["ContextT_co"] = Context) -> "ContextT_co":
         """Get Context from a discord.Message"""
         return await super().get_context(message, cls=cls)
     
-    @staticmethod
-    async def get_context_from_interaction(interaction: discord.Interaction, *, cls: type["ContextT_co"] = Context) -> "ContextT_co":
-        """Get Context from a discord.Interaction"""
-        return await cls.from_interaction(interaction)
+    async def process_commands(self, message: discord.Message) -> None:
+        """Process commands from a discord.Message"""
+        ctx = await self.get_context(message)
+        await self.invoke(ctx)
     
     def create_activity(
         self,

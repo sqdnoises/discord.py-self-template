@@ -1,6 +1,4 @@
 from typing import Any, TYPE_CHECKING
-from datetime import datetime
-
 import utils
 
 if TYPE_CHECKING:
@@ -28,22 +26,6 @@ class Context(commands.Context):
     async def react(self, emoji: str | discord.Emoji) -> None:
         """Add reaction to a message"""
         await self.message.add_reaction(emoji)
-    
-    def create_board(
-        self,
-        title:       str      | None = None,
-        description: str      | None = None,
-        url:         str      | None = None,
-        timestamp:   datetime | None = None
-    ) -> discord.Embed:
-        """Return a discord.Embed"""
-        return discord.Embed(
-            title=title,
-            description=description,
-            url=url,
-            color=discord.Color.dark_embed(), # dark gray embed background
-            timestamp=timestamp
-        )
     
     async def yes(self)          -> None: await self.react("✅")
     async def done(self)         -> None: await self.react("✅")
