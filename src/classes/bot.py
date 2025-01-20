@@ -107,11 +107,6 @@ class Bot(commands.Bot):
         """Get Context from a discord.Message"""
         return await super().get_context(message, cls=cls)
     
-    async def process_commands(self, message: discord.Message) -> None:
-        """Process commands from a discord.Message"""
-        ctx = await self.get_context(message)
-        await self.invoke(ctx)
-    
     def create_activity(
         self,
         name: str,
