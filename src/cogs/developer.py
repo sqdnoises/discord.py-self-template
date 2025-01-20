@@ -313,7 +313,7 @@ class Developer(Cog):
                     f"**Error:**\n{textwrap.indent(error_text, '> ', lambda _: True)}\n"
                      "**System Info:**\n"
                     f"> Python `{version}`\n"
-                    f"> discord.py `{dpy_version}`\n\n"
+                    f"> discord.py-self`{dpy_version}`\n\n"
                      "**Execution Info:**\n"
                     f"> Took `{time_text}`\n"
                     f"> Return Type: `{type(e)}`"
@@ -359,7 +359,7 @@ class Developer(Cog):
                         f"\n**Error:**\n{textwrap.indent(error_text, '> ', lambda _: True)}\n\n"
                          "**System Info:**\n"
                         f"> Python `{version}`\n"
-                        f"> discord.py `{dpy_version}`\n\n"
+                        f"> discord.py-self `{dpy_version}`\n\n"
                          "**Execution Info:**\n"
                         f"> Took `{time_text}`\n"
                         f"> Return Type: `{type(e)}`"
@@ -405,7 +405,7 @@ class Developer(Cog):
                     ) + (
                         f"\n**System Info:**\n"
                         f"> Python `{version}`\n"
-                        f"> discord.py `{dpy_version}`\n\n"
+                        f"> discord.py-self `{dpy_version}`\n\n"
                         f"**Execution Info:**\n"
                         f"> Took `{time_text}`"
                     )
@@ -421,14 +421,17 @@ class Developer(Cog):
                                 f"{output}")
         
         try:
-            await ctx.send(response_text)
-        except discord.HTTPException:
-            await ctx.send("Output too big to send. Check console.")
-        except Exception as e:
-            error = utils.error(e)
-            await ctx.send(f"An error occured.\n"
-                            f"{error}")
-            logging.error("error occured while sending execution failed output", exc_info=e)
+            await ctx.reply(response_text)
+        except:
+            try:
+                await ctx.send(response_text)
+            except discord.HTTPException:
+                await ctx.send("Output too big to send. Check console.")
+            except Exception as e:
+                error = utils.error(e)
+                await ctx.send(f"An error occured.\n"
+                                f"{error}")
+                logging.error("error occured while sending execution failed output", exc_info=e)
 
 async def setup(bot: Bot) -> None:
     await bot.add_cog(Developer(bot))
