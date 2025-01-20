@@ -44,7 +44,11 @@ logging.info("loaded environment variables")
 
 bot = Bot(
     command_prefix = utils.bot.get_prefix,
-    strip_after_prefix = True
+    strip_after_prefix = True,
+    #self_bot = True # lets only user run commands
+    user_bot = True # lets the user and others run commands
+    # if both are not specified or False, it only lets others run commands
+    # self_bot and user_bot can't be used together
 )
 
 utils.console.print_terminal_size()
