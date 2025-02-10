@@ -1,22 +1,21 @@
 import sys
+import logging       as logg
 import pkg_resources
-from typing   import (
-    TYPE_CHECKING,
-    Literal
-)
+from typing   import TYPE_CHECKING
 from datetime import datetime
 
-import cogs
-import utils
-import config
-from utils               import mprint
-from logger              import logging
-from termcolors          import *
-from termcolors          import rgb
-from classes.context     import Context
+from ..            import cogs
+from ..            import utils
+from ..            import config
+from ..utils       import mprint
+from ..logger      import logging
+from ..termcolors  import *
+from ..termcolors  import rgb
+
+from .context import Context
 
 if TYPE_CHECKING:
-    from classes.custom_types import (
+    from .custom_types import (
         ContextT_co,
         PrefixType
     )
@@ -31,7 +30,6 @@ __all__ = (
 )
 
 class Bot(commands.Bot):
-    """The main bot class which handles everything, including handling of events, commands, interactions, cogs, extensions, etc. and the bot itself."""
     uptime: datetime | None
     prisma: Prisma
     
@@ -41,22 +39,29 @@ class Bot(commands.Bot):
         self.prisma = Prisma(auto_register=True)
     
     async def connect_db(self) -> None:
+        if self.prisma.is_connected():
+            logging.warn("tried to connect to database while already connected")
+            return
+        
         await self.prisma.connect()
+        logging.info(f"connected to database {config.DATABASE_LOCATION}")
     
     async def disconnect_db(self) -> None:
+        if not self.prisma.is_connected():
+            logging.warn("tried to disconnect from database while already disconnected")
+            return
+        
         await self.prisma.disconnect()
+        logging.info("disconnected from database")
     
-    async def setup_hook(self) -> None:
-        self.uptime = discord.utils.utcnow()
-        
-        mprint()
-        mprint(f"{white}~{reset} {bold}{green}{config.BOT_NAME.upper()}{reset} {white}~{reset}")
-        mprint(f"{bright_green}running on{reset} {yellow}python{reset} {blue}{sys.version.split()[0]}{reset}; {yellow}discord.py{reset} {blue}{pkg_resources.get_distribution('discord.py-self').version}{reset}")
-        mprint()
-        
-        await self.connect_db()
-        logging.info("connected to database ./database/database.db")
-        
+    async def enable_wal_mode(self) -> None:
+        try:
+            await self.prisma.execute_raw("PRAGMA journal_mode=WAL;")
+            print("SQLite3 journal mode set to WAL.")
+        except Exception as e:
+            print(f"Error setting WAL mode: {e}")
+    
+    async def _load_all_cogs(self) -> None:
         loaded = []
         excluded = []
         
@@ -94,34 +99,46 @@ class Bot(commands.Bot):
         
         logging.info(loaded_str.strip())
         logging.info(excluded_str.strip())
+    
+    async def setup_hook(self) -> None:
+        self.uptime = discord.utils.utcnow()
         
-        logging.info(f"commands loaded: {len(self.commands)}")
+        mprint()
+        mprint(f"{white}~{reset} {bold}{green}{config.BOT_NAME.upper()}{reset} {white}~{reset}")
+        mprint(f"{bright_green}running on{reset} {yellow}python{reset} {blue}{sys.version.split()[0]}{reset}; {yellow}discord.py{reset} {blue}{pkg_resources.get_distribution('discord.py').version}{reset}")
+        mprint()
+        
+        await self.connect_db()
+        await self._load_all_cogs()
         
         if TYPE_CHECKING and self.user is None:
             return  # to satisfy the type checker
         
+        logging.info(f"commands loaded: {len(self.commands)}")
+        
         logging.info("logged in successfully")
         logging.info(f"user: {self.user} ({self.user.id})")
+    
+    async def close(self, *, abandon: bool = False) -> None:
+        """Disconnect from the database, close the bot, flush stdout & stderr and shutdown loggers"""
+        # Disconnect from the database
+        await self.disconnect_db()
+        
+        # Close the bot
+        await super().close()
+        
+        # Flush stdout & stderr
+        sys.stdout.flush()
+        sys.stderr.flush()
+        
+        # Shutdown loggers
+        logging.critical("bot process exited" if not abandon else "bot process exited (abandoned)")
+        logg.shutdown()
+        logging.close()
+        
+        if abandon:
+            print()
     
     async def get_context(self, message: discord.Message, *, cls: type["ContextT_co"] = Context) -> "ContextT_co":
         """Get Context from a discord.Message"""
         return await super().get_context(message, cls=cls)
-    
-    def create_activity(
-        self,
-        name: str,
-        type: Literal["playing", "streaming", "listening", "watching"] = "playing",
-        *args,
-        **kwargs
-    ) -> discord.Activity | discord.Game | discord.Streaming:
-        """Create an activity for a given type"""
-
-        match type:
-            case "playing":
-                return discord.Game(name=name, *args, **kwargs)
-            case "streaming":
-                return discord.Streaming(name=name, *args, **kwargs)
-            case "listening":
-                return discord.Activity(type=discord.ActivityType.listening, name=name, *args, **kwargs)
-            case "watching":
-                return discord.Activity(type=discord.ActivityType.watching, name=name, *args, **kwargs)

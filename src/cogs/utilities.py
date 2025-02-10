@@ -4,8 +4,8 @@ from typing import (
     Literal, Iterable
 )
 
-import utils
-from classes import Bot, Cog, Context
+from ..        import utils
+from ..classes import Bot, Cog, Context
 
 import psutil
 from ping3 import ping

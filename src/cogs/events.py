@@ -1,13 +1,8 @@
-import utils
-import aiohttp
-import requests
-from logger  import logging
+from ..        import config
+from ..logger  import logging
+from ..classes import Bot, Cog, Context
 
-import config
-from classes import Bot, Cog, Context
-
-import discord
-from discord.ext import commands, tasks
+from discord.ext import commands
 
 class Events(Cog):
     """All bot events"""
