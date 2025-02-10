@@ -15,7 +15,7 @@ __all__ = (
 
 def print_versions():
     logging.info(f"python {sys.version}")
-    logging.info(f"discord.py {pkg_resources.get_distribution('discord.py').version}")
+    logging.info(f"discord.py-self {pkg_resources.get_distribution('discord.py-self').version}")
 
 def print_terminal_size():
     try:
