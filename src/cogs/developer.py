@@ -9,14 +9,18 @@ import asyncio
 import datetime
 import textwrap
 import pkg_resources
-from typing     import TYPE_CHECKING, Literal, Optional
-from contextlib import redirect_stdout, redirect_stderr
+from typing     import (
+    TYPE_CHECKING, Optional
+)
+from contextlib import (
+    redirect_stdout, redirect_stderr
+)
 
-import utils
-import checks
-import config
-from logger  import logging
-from classes import Bot, Cog, Context
+from ..        import utils
+from ..        import checks
+from ..        import config
+from ..logger  import logging
+from ..classes import Bot, Cog, Context
 
 import discord
 from discord.ext import commands
@@ -33,7 +37,7 @@ class Developer(Cog):
     async def cog_check(self, ctx: Context) -> bool:
         return checks.is_admin(ctx)
     
-    @commands.command(aliases=["load_extension"])
+    @commands.command(aliases=["load-extension"])
     async def load(self, ctx: Context, cog: str) -> None:
         """Loads a specified cog.
         
@@ -48,7 +52,7 @@ class Developer(Cog):
         await ctx.send(f"✅ Loaded the extension: `{ext}`")
         logging.info(f"successfully loaded `{ext}`")
     
-    @commands.command(aliases=["unload_extension"])
+    @commands.command(aliases=["unload-extension"])
     async def unload(self, ctx: Context, cog: str) -> None:
         """Unloads a specified cog.
         
@@ -63,7 +67,7 @@ class Developer(Cog):
         await ctx.send(f"✅ Unloaded the extension: `{ext}`")
         logging.info(f"successfully unloaded `{ext}`")
     
-    @commands.command(aliases=["r", "re", "reload_all", "reload_extension", "reload_all_extensions"])
+    @commands.command(aliases=["r", "re", "reload-all", "reload-extension", "reload-all-extensions"])
     async def reload(self, ctx: Context, *cogs: str) -> None:
         """Reloads specified cogs or all cogs if none are specified.
         
@@ -102,7 +106,7 @@ class Developer(Cog):
         
         await msg.edit(content=ext_status)
     
-    @commands.command(aliases=["exts", "loaded", "loaded_extensions"])
+    @commands.command(aliases=["exts", "loaded", "loaded-extensions"])
     async def extensions(self, ctx: Context) -> None:
         """Lists all currently loaded cogs."""
         paginated_list = utils.paginate([f"`{k}`" for k in self.bot.extensions.keys()])
@@ -125,7 +129,7 @@ class Developer(Cog):
             if ctx.command and len(ctx.args) > 2:
                 ext = "cogs."+ctx.args[2]
                 logging.error(f"failed to {ctx.command.name} `{ext}`: `{error.__class__.__name__}`", exc_info=error)
-                await ctx.send(f"❌ Error occured while {ctx.command.name}ing the extension: `{ext}`\n"+
+                await ctx.send(f"❌ Error occurred while {ctx.command.name}ing the extension: `{ext}`\n"+
                                utils.code(f"{e.__class__.__name__}: {str(e)}"))
             
             else:
@@ -137,23 +141,22 @@ class Developer(Cog):
     @commands.command()
     async def restart(self, ctx: Context) -> None:
         """Restarts the bot."""
-        logging.warning(f"{ctx.author.display_name} (@{ctx.author}, id: {ctx.author.id}) wants to restart the bot")
+        logging.warning(f"{ctx.author.display_name} (@{ctx.author}, id: {ctx.author.id}) is restarting the bot")
         
         try:
             await ctx.react("🫠")
         except Exception as e:
             logging.error("couldn't react to message, ignoring and restarting", exc_info=e)
         
-        logging.warning("replacing current process with a new one")
-        logging.warning(f"running `{' '.join([sys.executable] + sys.argv)}` in os.execv()")
-        logging.critical("abandoned")
-        print()
+        logging.warning("closing bot and replacing current process with a new one by running:\n"
+                        f"`{' '.join([sys.executable] + sys.argv)}` in os.execv()")
+        await self.bot.close()
         os.execv(sys.executable, ["python"] + sys.argv)
     
     @commands.command()
     async def shutdown(self, ctx: Context) -> None:
         """Shuts down the bot."""
-        logging.warning(f"{ctx.author.display_name} (@{ctx.author}, id: {ctx.author.id}) wants to shutdown the bot")
+        logging.warning(f"{ctx.author.display_name} (@{ctx.author}, id: {ctx.author.id}) is shutting down the bot")
         
         try:
             await ctx.react("🫀")
@@ -195,44 +198,6 @@ class Developer(Cog):
         msg.content = ctx.prefix + command
         new_ctx = await self.bot.get_context(msg, cls=type(ctx))
         await self.bot.invoke(new_ctx)
-
-    @commands.command()
-    async def do(
-        self,
-        ctx: Context,
-        times: int,
-        channel: Optional[discord.TextChannel],
-        who: Optional[discord.Member | discord.User],
-        *,
-        command: str
-    ) -> None:
-        """Repeats a command a specified number of times, optionally as another person in another channel.
-        
-        Parameters
-        ----------
-        times : int
-            The number of times to repeat the command.
-        channel : Optional[discord.TextChannel]
-            The channel to run the command in. If not specified, it defaults to the current channel.
-        who : Optional[discord.Member | discord.User]
-            The user to impersonate when running the command. If not specified, defaults to the original command user.
-        command : str
-            The command to run.
-        """
-        if TYPE_CHECKING and ctx.prefix is None:
-            # to satisfy the typechecker
-            return
-        
-        msg = copy.copy(ctx.message)
-        new_channel = channel or ctx.channel
-        msg.channel = new_channel
-        msg.author = who or ctx.author
-        msg.content = ctx.prefix + command
-        
-        new_ctx = await self.bot.get_context(msg, cls=type(ctx))
-        
-        for i in range(times):
-            await new_ctx.reinvoke()
     
     @commands.command(name="exec", aliases=["eval", "run"])
     async def _exec(self, ctx: Context, *, code: str) -> None:
@@ -429,9 +394,9 @@ class Developer(Cog):
                 await ctx.send("Output too big to send. Check console.")
             except Exception as e:
                 error = utils.error(e)
-                await ctx.send(f"An error occured.\n"
+                await ctx.send(f"An error occurred.\n"
                                 f"{error}")
-                logging.error("error occured while sending execution failed output", exc_info=e)
+                logging.error("error occurred while sending execution failed output", exc_info=e)
 
 async def setup(bot: Bot) -> None:
     await bot.add_cog(Developer(bot))

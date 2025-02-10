@@ -1,1 +1,1 @@
-__all__ = ()
+EXAMPLE = "<:example:1234>"

@@ -1,11 +1,17 @@
-from typing import Any, TYPE_CHECKING
-import utils
+from typing import (
+    TYPE_CHECKING, Any,
+    Optional, Sequence
+)
+from datetime import datetime
+
+from .. import utils
 
 if TYPE_CHECKING:
-    from bot import Bot
+    from .bot import Bot
 
 import discord
-from discord.ext import commands
+from discord.ext   import commands
+from discord.utils import MISSING
 
 class Context(commands.Context):
     """Utility class for commands that is used to easily interact with commands."""
@@ -23,9 +29,57 @@ class Context(commands.Context):
         self.voice = self.author.voice if isinstance(self.author, discord.Member) else None
         self.cleaned_up_code = utils.cleanup_code(self.message.content)
     
-    async def react(self, emoji: str | discord.Emoji) -> None:
-        """Add reaction to a message"""
-        await self.message.add_reaction(emoji)
+    async def edit(
+        self,
+        *,
+        content: Optional[str] = MISSING,
+        attachments: Sequence[discord.Attachment | discord.File] = MISSING,
+        suppress: bool = False,
+        delete_after: Optional[float] = None,
+        allowed_mentions: Optional[discord.AllowedMentions] = MISSING
+    ) -> discord.Message:
+        """Edit the message"""
+        return await self.message.edit(
+            content = content,
+            attachments = attachments,
+            suppress = suppress,
+            delete_after = delete_after,
+            allowed_mentions = allowed_mentions
+        )
+    
+    async def react(
+        self,
+        emoji: str | discord.Emoji,
+        *,
+        boost: bool = False
+    ) -> None:
+        """Add a reaction to the message"""
+        await self.message.add_reaction(emoji, boost=boost)
+    
+    async def unreact(
+        self,
+        emoji: str | discord.Emoji,
+        member: discord.abc.Snowflake,
+        boost: bool = False
+    ) -> None:
+        """Remove a reaction from the message"""
+        await self.message.remove_reaction(emoji=emoji, member=member, boost=boost)
+    
+    def create_board(
+        self,
+        title:       str      | None = None,
+        description: str      | None = None,
+        url:         str      | None = None,
+        timestamp:   datetime | None = None
+    ) -> discord.Embed:
+        """Return a discord.Embed"""
+        return discord.Embed(
+            title = title,
+            description = description,
+            url = url,
+            color = discord.Color.dark_embed(), # dark gray embed background
+            timestamp = timestamp
+        )
     
     async def yes(self)          -> None: await self.react("✅")
     async def done(self)         -> None: await self.react("✅")
@@ -41,4 +95,3 @@ class Context(commands.Context):
     async def fail(self)         -> None: await self.react("❌")
     async def cross(self)        -> None: await self.react("❌")
     async def failure(self)      -> None: await self.react("❌")
-    async def unsuccessful(self) -> None: await self.react("❌")
