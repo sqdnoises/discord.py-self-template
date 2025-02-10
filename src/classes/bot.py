@@ -105,7 +105,7 @@ class Bot(commands.Bot):
         
         mprint()
         mprint(f"{white}~{reset} {bold}{green}{config.BOT_NAME.upper()}{reset} {white}~{reset}")
-        mprint(f"{bright_green}running on{reset} {yellow}python{reset} {blue}{sys.version.split()[0]}{reset}; {yellow}discord.py{reset} {blue}{pkg_resources.get_distribution('discord.py').version}{reset}")
+        mprint(f"{bright_green}running on{reset} {yellow}python{reset} {blue}{sys.version.split()[0]}{reset}; {yellow}discord.py-self{reset} {blue}{pkg_resources.get_distribution('discord.py-self').version}{reset}")
         mprint()
         
         await self.connect_db()
